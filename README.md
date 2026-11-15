@@ -2,7 +2,7 @@
 
 Petal Post lets you build a bouquet, write a note and send it as a link. When your person opens the link, an envelope unseals, the bouquet grows stem by stem and your note writes itself out.
 
-**Live site:** https://vishalcodingninja.github.io/petal-post/
+**Live site:** https://codemitvishal.github.io/petal-post/
 
 ## Use cases
 
