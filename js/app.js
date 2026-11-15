@@ -153,6 +153,161 @@
     });
   }
 
+  /* ================= PUBLIC FLOWER WALL ================= */
+  const Wall = (() => {
+    const cfg = () => window.PETAL_CONFIG || {};
+    const on = () => !!(cfg().supabaseUrl && cfg().supabaseAnonKey);
+    const STAT_LABELS = [['bouquets', 'bouquets sent'], ['stems', 'stems given'], ['recipients', 'people got flowers'], ['senders', 'people sent flowers']];
+    const rtf = 'RelativeTimeFormat' in Intl ? new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' }) : null;
+    let rows = [], stats = null, seen = new Map(), timer = 0, mode = null, loadedOnce = false;
+
+    function api(path, body, prefer) {
+      const url = `${cfg().supabaseUrl.replace(/\/+$/, '')}/rest/v1/${path}`;
+      const headers = { apikey: cfg().supabaseAnonKey, 'Content-Type': 'application/json' };
+      if (prefer) headers.Prefer = prefer;
+      return fetch(url, { method: 'POST', headers, body: JSON.stringify(body) }).then(r => {
+        if (!r.ok) throw new Error(`wall ${path}: ${r.status}`);
+        return prefer ? null : r.json();
+      });
+    }
+
+    // First name only, letters plus . ' - and spaces, max 20 chars (mirrors the database check).
+    function firstName(s) {
+      const word = String(s || '').trim().split(/\s+/)[0] || '';
+      return word.replace(/[^\p{L} .'-]/gu, '').replace(/^[^\p{L}]+/u, '').slice(0, 20);
+    }
+
+    function ago(ts) {
+      const s = (new Date(ts).getTime() - Date.now()) / 1000;
+      if (!rtf || !Number.isFinite(s)) return '';
+      for (const [u, n] of [['year', 31536e3], ['month', 2592e3], ['week', 604800], ['day', 864e2], ['hour', 3600], ['minute', 60]]) {
+        if (Math.abs(s) >= n) return rtf.format(Math.round(s / n), u);
+      }
+      return 'just now';
+    }
+
+    function countUp(el, to) {
+      const from = +el.dataset.v || 0;
+      el.dataset.v = to;
+      if (reduced() || from === to) { el.textContent = to.toLocaleString(); return; }
+      const t0 = performance.now(), dur = 1300;
+      const step = t => {
+        const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+        el.textContent = Math.round(from + (to - from) * e).toLocaleString();
+        if (k < 1 && +el.dataset.v === to) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+      if (to > from && from > 0) { el.parentElement.classList.remove('tick'); void el.offsetWidth; el.parentElement.classList.add('tick'); }
+    }
+
+    function renderStats() {
+      $$('[data-stats]').forEach(box => {
+        if (!box.children.length) {
+          box.innerHTML = STAT_LABELS.map(([k, l]) => `<div class="stat"><b data-stat="${k}">0</b><span>${l}</span></div>`).join('');
+        }
+        if (stats) STAT_LABELS.forEach(([k]) => countUp(box.querySelector(`[data-stat="${k}"]`), Math.max(0, +stats[k] || 0)));
+      });
+    }
+
+    function item(r, fresh) {
+      const li = document.createElement('li');
+      li.className = 'wall-item' + (fresh ? ' fresh' : '');
+      const ids = String(r.flowers || '').split('.').filter(id => F.BY_ID[id]);
+      const uniq = [...new Set(ids)].slice(0, 4);
+      const times = Math.max(1, +r.times || 1), stems = Math.max(0, +r.stems || 0);
+      const occ = OCC[r.occasion];
+      li.innerHTML =
+        `<div class="wi-flowers" aria-hidden="true">${uniq.map(id => F.headThumb(id)).join('')}</div>` +
+        '<div class="wi-main"><p class="wi-names"><strong class="wi-from"></strong><span class="wi-arrow" aria-label="sent flowers to">→</span><strong class="wi-to"></strong></p><p class="wi-meta"></p></div>' +
+        `<span class="wi-count"><b>${times}</b>${times === 1 ? 'bouquet' : 'bouquets'}</span>`;
+      li.querySelector('.wi-from').textContent = r.sender;
+      li.querySelector('.wi-to').textContent = r.recipient;
+      li.querySelector('.wi-meta').textContent = [occ ? `${occ.emoji} ${occ.label}` : '', `${stems} ${stems === 1 ? 'stem' : 'stems'}`, uniq.map(id => F.BY_ID[id].name).join(', '), ago(r.last_at)].filter(Boolean).join(' · ');
+      return li;
+    }
+
+    function renderList(host, list, limit) {
+      host.innerHTML = '';
+      list.slice(0, limit).forEach((r, i) => {
+        const key = `${r.sender}|${r.recipient}`.toLowerCase();
+        const fresh = loadedOnce && seen.get(key) !== r.last_at;
+        const li = item(r, fresh);
+        li.style.setProperty('--i', Math.min(i, 12));
+        host.appendChild(li);
+      });
+    }
+
+    function renderAll() {
+      renderStats();
+      const empty = !rows.length;
+      const home = $('#homeWall');
+      renderList(home, rows, 6);
+      if (empty) home.innerHTML = '<li class="wall-empty-item">No bouquets on the wall yet. Send one and be the first.</li>';
+      const q = ($('#wallSearch').value || '').trim().toLowerCase();
+      const list = q ? rows.filter(r => `${r.sender} ${r.recipient}`.toLowerCase().includes(q)) : rows;
+      renderList($('#fullWall'), list, 200);
+      const msg = $('#wallEmpty');
+      msg.hidden = list.length > 0;
+      msg.textContent = empty ? 'No bouquets on the wall yet. Send one and be the first.' : `Nobody called “${q}” on the wall yet.`;
+      seen = new Map(rows.map(r => [`${r.sender}|${r.recipient}`.toLowerCase(), r.last_at]));
+    }
+
+    async function load() {
+      if (!on()) return;
+      try {
+        const [s, w] = await Promise.all([api('rpc/gift_stats', {}), api('rpc/gift_wall', { max_rows: 200 })]);
+        stats = s || {};
+        rows = Array.isArray(w) ? w.filter(r => r && r.sender && r.recipient) : [];
+        renderAll();
+        loadedOnce = true;
+        $('#wallBlock').hidden = false;
+        $('#wallEmpty').classList.remove('error');
+      } catch (e) {
+        console.warn(e);
+        if (!loadedOnce) {
+          const msg = $('#wallEmpty');
+          msg.hidden = false; msg.classList.add('error');
+          msg.textContent = "Couldn't load the flower wall right now. Please try again in a moment.";
+        }
+      }
+    }
+
+    // mode: 'home' | 'wall' | null — polls while a view that shows the wall is open.
+    function show(m) {
+      mode = on() ? m : null;
+      clearInterval(timer);
+      if (!mode) return;
+      renderStats();
+      if (mode === 'wall') observeReveals($('#view-wall'));
+      load();
+      timer = setInterval(() => { if (!document.hidden) load(); }, 30000);
+    }
+
+    async function record(data, code) {
+      if (!on() || !state.wall) return;
+      const recipient = firstName(state.t);
+      if (!recipient || !data.b) return;
+      const done = store.get('petalpost.walled') || [];
+      if (done.includes(code)) return;
+      const flowers = data.b.split('.').slice(0, MAX);
+      try {
+        await api('gifts', { sender: firstName(state.f) || 'Someone', recipient, occasion: OCC[data.o] ? data.o : null, stems: flowers.length, flowers: flowers.join('.') }, 'return=minimal');
+        store.set('petalpost.walled', [...done, code].slice(-50));
+        toast(`Added to the flower wall: ${firstName(state.f) || 'Someone'} → ${recipient} 🌸`);
+      } catch (e) {
+        console.warn(e);
+        toast("Your link is ready, but the flower wall couldn't be updated.");
+      }
+    }
+
+    function init() {
+      $('#wallNav').hidden = !on();
+      $('#wallSearch').addEventListener('input', renderAll);
+    }
+
+    return { on, show, record, firstName, init };
+  })();
+
   /* ================= HOME ================= */
   const HERO_SETS = [
     ['rp', 'rr', 'sk', 'dz', 'rr', 'lv', 'bb', 'ty', 'rp'],
@@ -222,7 +377,7 @@
   /* ================= BUILDER ================= */
   let uidN = 0;
   const newItem = (id, k = Math.random()) => ({ uid: `u${++uidN}`, id, k });
-  const blankState = () => ({ o: '', items: [], w: 'kraft', r: 'ruby', t: '', f: '', m: '', mAuto: false, d: '', s: randSeed(), step: 0, touched: false, noteIdx: 0 });
+  const blankState = () => ({ o: '', items: [], w: 'kraft', r: 'ruby', t: '', f: '', m: '', mAuto: false, d: '', s: randSeed(), step: 0, touched: false, noteIdx: 0, wall: false });
   let state = restore();
 
   function restore() {
@@ -231,7 +386,7 @@
     if (!d || typeof d !== 'object') return s;
     Object.assign(s, sanitize({ ...d, b: (d.items || []).map(i => i.id).join('.') }));
     s.items = (d.items || []).filter(i => F.BY_ID[i.id]).slice(0, MAX).map(i => newItem(i.id, +i.k || Math.random()));
-    s.mAuto = !!d.mAuto; s.touched = !!d.touched; s.step = Math.min(4, Math.max(0, d.step | 0));
+    s.mAuto = !!d.mAuto; s.touched = !!d.touched; s.wall = !!d.wall; s.step = Math.min(4, Math.max(0, d.step | 0));
     return s;
   }
   function save() {
@@ -349,12 +504,16 @@
     $('#nextBtn').addEventListener('click', () => goStep(Math.min(4, state.step + 1)));
 
     // share
+    const shared = () => { const data = giftData(); Wall.record(data, encode(data)); };
     $('#copyBtn').addEventListener('click', copyLink);
+    $('#waBtn').addEventListener('click', shared);
+    $('#mailBtn').addEventListener('click', shared);
     if (navigator.share) {
       const nb = $('#nativeShareBtn');
       nb.hidden = false;
-      nb.addEventListener('click', () => navigator.share({ title: 'Flowers for you 💐', text: shareText(false), url: giftUrl() }).catch(() => {}));
+      nb.addEventListener('click', () => navigator.share({ title: 'Flowers for you 💐', text: shareText(false), url: giftUrl() }).then(shared).catch(() => {}));
     }
+    $('#wallOpt').addEventListener('change', e => { state.wall = e.target.checked; save(); });
     $('#previewBtn').addEventListener('click', () => {
       if (!state.items.length) return;
       sess.set('pp.preview', '1');
@@ -387,6 +546,8 @@
     const b = $('#copyBtn');
     if (ok) {
       b.classList.add('copied'); b.firstElementChild.textContent = 'Copied ✓';
+      const data = giftData();
+      Wall.record(data, encode(data));
       burstFrom(b, 18);
       setTimeout(() => { b.classList.remove('copied'); b.firstElementChild.textContent = 'Copy link'; }, 1800);
     } else toast('Copy failed. Select the link and copy it manually.');
@@ -501,6 +662,17 @@
     const w = F.WRAPS[state.w].name, r = F.RIBBONS[state.r].name;
     const when = state.d ? ` It will open on ${new Date(state.d + 'T00:00').toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}.` : '';
     $('#sendSummary').textContent = `${n} ${n === 1 ? 'stem' : 'stems'}, ${w.toLowerCase()} paper and a ${r.toLowerCase()} ribbon${state.t.trim() ? ` for ${state.t.trim()}` : ''}.${when}`;
+    const consent = $('#wallConsent'), opt = $('#wallOpt');
+    consent.hidden = !Wall.on();
+    if (Wall.on()) {
+      const to = Wall.firstName(state.t), from = Wall.firstName(state.f) || 'Someone';
+      opt.checked = state.wall;
+      opt.disabled = !to;
+      consent.classList.toggle('off', !to);
+      $('#wallPreview').textContent = to
+        ? `Shows “${from} → ${to}”, the occasion and the flowers. First names only. Your note stays private.`
+        : 'Add their name in the Note step to join the wall.';
+    }
     $('#waBtn').href = 'https://wa.me/?text=' + encodeURIComponent(shareText());
     $('#mailBtn').href = `mailto:?subject=${encodeURIComponent('I sent you flowers 💐')}&body=${encodeURIComponent(shareText())}`;
   }
@@ -733,10 +905,17 @@
     const h = location.hash || '#/';
     const run = () => {
       if (h.startsWith('#/g/')) {
+        Wall.show(null);
         swapView('view-gift');
         showGift(h.slice(4));
+      } else if (h.startsWith('#/wall') && Wall.on()) {
+        clearInterval(cdTimer); typeToken++;
+        swapView('view-wall');
+        document.title = 'The flower wall · Petal Post';
+        Wall.show('wall');
       } else if (h.startsWith('#/create')) {
         clearInterval(cdTimer); typeToken++;
+        Wall.show(null);
         swapView('view-create');
         initBuilder();
         if (!state.o && !state.items.length) state.step = 0;
@@ -748,6 +927,7 @@
         document.title = 'Petal Post — Send flowers that never wilt';
         growHero();
         observeReveals($('#view-home'));
+        Wall.show('home');
       }
     };
     if (document.startViewTransition && !reduced() && route.ready) document.startViewTransition(run);
@@ -763,6 +943,7 @@
 
   initHome();
   initGift();
+  Wall.init();
   addEventListener('hashchange', route);
   route();
 })();

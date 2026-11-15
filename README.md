@@ -17,8 +17,20 @@ Petal Post lets you build a bouquet, write a note and send it as a link. When yo
 | Recipient | A moment, not just a message | Envelope opens with a petal burst, the bouquet grows, the note types out and the flower meanings appear. |
 | Recipient | Reply in kind | **Send flowers back** opens the builder with the names swapped. |
 | Recipient | Keep it | **Save keepsake** downloads a 1080×1350 PNG of the bouquet and note. |
-| Everyone | Privacy | No backend, no accounts, no tracking. The bouquet is encoded in the link's `#hash`, which the browser never sends to a server. |
+| Everyone | See who's sending flowers | The **public flower wall** shows who sent flowers to whom, how many bouquets and stems, and which flowers, plus live totals. Senders opt in per gift. |
+| Everyone | Privacy | The note, link and surprise date never leave the link's `#hash`. The wall stores only first names, occasion and flower codes, and only when the sender ticks the box. |
 | Everyone | Accessibility | Keyboard-operable, labelled controls, and `prefers-reduced-motion` turns off falling petals and long animations. |
+
+## Public flower wall (setup, about 5 minutes)
+
+GitHub Pages can't store data, so the wall uses a free [Supabase](https://supabase.com) database. Until it's configured, the wall stays hidden and everything else works as before.
+
+1. Create a free Supabase project.
+2. Open **SQL Editor → New query**, paste [`supabase/schema.sql`](supabase/schema.sql) and click **Run**.
+3. In **Project Settings → API** (or **Connect**), copy the **Project URL** and the **anon public** (or **publishable**) key.
+4. Paste both into [`js/config.js`](js/config.js), then commit and push.
+
+What the database allows: visitors can **add** a gift (first names checked against letters only, max 20 chars, 1–12 stems) and read two summaries, `gift_stats()` for the totals and `gift_wall()` for one row per sender → recipient pair with counts. Raw rows can't be read, edited or deleted from the site. To remove an entry, delete it in Supabase's **Table Editor**.
 
 ## Motion design
 
@@ -36,7 +48,9 @@ Plain HTML, CSS and JavaScript with no build step. All flowers are procedural SV
 index.html      views: home, builder, gift
 css/styles.css  design tokens, layout, animations
 js/flowers.js   flower catalog, SVG heads, bouquet layout
-js/app.js       routing, builder state, gift reveal, petals, keepsake
+js/app.js       routing, builder state, gift reveal, petals, keepsake, flower wall
+js/config.js    Supabase URL + public key for the flower wall (empty = wall off)
+supabase/       database schema for the flower wall
 ```
 
 Run locally:

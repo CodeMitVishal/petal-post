@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=3">
+  <link rel="stylesheet" href="css/styles.css?v=5">
 </head>
 <body>
   <canvas id="petals" aria-hidden="true"></canvas>
@@ -24,7 +24,10 @@
       <svg viewBox="-32 -32 64 64" aria-hidden="true"><g fill="#E0455F"><circle r="12" cy="-14"/><circle r="12" cy="-14" transform="rotate(72)"/><circle r="12" cy="-14" transform="rotate(144)"/><circle r="12" cy="-14" transform="rotate(216)"/><circle r="12" cy="-14" transform="rotate(288)"/></g><circle r="8" fill="#F4B63F"/></svg>
       <span>Petal Post</span>
     </a>
-    <a href="#/create" class="btn btn-small" data-new>Send flowers</a>
+    <nav class="topnav">
+      <a href="#/wall" class="nav-link" id="wallNav" aria-label="Flower wall" hidden><span class="live-dot" aria-hidden="true"></span><span class="nl-text">Flower wall</span></a>
+      <a href="#/create" class="btn btn-small" data-new>Send flowers</a>
+    </nav>
   </header>
 
   <main id="main">
@@ -43,7 +46,7 @@
             <button class="btn btn-ghost" id="sampleBtn" type="button">Open a sample gift</button>
           </div>
           <ul class="trust" data-reveal>
-            <li>Free</li><li>No sign-up</li><li>Nothing stored on a server</li>
+            <li>Free</li><li>No sign-up</li><li>Your note never leaves the link</li>
           </ul>
         </div>
         <div class="hero-art" data-reveal>
@@ -58,6 +61,17 @@
           </button>
         </div>
       </div>
+
+      <section class="wrap block wall-block" id="wallBlock" aria-labelledby="wall-h" hidden>
+        <div class="block-head">
+          <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span>Live on Petal Post</p>
+          <h2 id="wall-h">Flowers in the air</h2>
+          <p>Who's sending flowers to whom, and how often. First names only, and only when the sender opts in.</p>
+        </div>
+        <div class="stats" data-stats></div>
+        <ol class="wall-list" id="homeWall"></ol>
+        <a href="#/wall" class="chip-btn wall-more">See the whole flower wall →</a>
+      </section>
 
       <section class="wrap block" aria-labelledby="occ-h">
         <div class="block-head" data-reveal>
@@ -92,7 +106,7 @@
           <article data-reveal><h3>Surprise date</h3><p>Send it today and choose the day it opens. Until then they see a sealed envelope with a countdown.</p></article>
           <article data-reveal><h3>Send one back</h3><p>Recipients can answer with a bouquet of their own in one tap, with the names already filled in.</p></article>
           <article data-reveal><h3>Keepsake image</h3><p>Save the bouquet and note as an image to keep, print or post.</p></article>
-          <article data-reveal><h3>Private by design</h3><p>Your bouquet and note live only inside the link. We don't use a database, accounts or tracking.</p></article>
+          <article data-reveal><h3>Private by design</h3><p>Your note lives only inside the link. Nothing goes on the public wall unless you tick the box, and then only first names and flowers.</p></article>
         </div>
       </section>
 
@@ -193,6 +207,13 @@
               <h2>Ready to send 💌</h2>
               <p class="hint" id="sendSummary"></p>
               <div class="warn" id="sendWarn" hidden></div>
+              <label class="consent" id="wallConsent" hidden>
+                <input type="checkbox" id="wallOpt">
+                <span>
+                  <strong>Add to the public flower wall</strong>
+                  <small id="wallPreview"></small>
+                </span>
+              </label>
               <div class="link-box" id="linkBox">
                 <label for="linkOut" class="sr-only">Gift link</label>
                 <input id="linkOut" readonly>
@@ -216,7 +237,7 @@
                   Preview as them
                 </button>
               </div>
-              <p class="hint small">Your bouquet and note are stored only inside this link. Anyone who has the link can open it.</p>
+              <p class="hint small">Your note is stored only inside this link. Anyone who has the link can open it.</p>
             </div>
           </div>
 
@@ -225,6 +246,28 @@
             <button class="btn btn-primary" id="nextBtn" type="button">Next</button>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- ================= WALL ================= -->
+    <section class="view" id="view-wall" aria-label="The flower wall" hidden>
+      <div class="wrap wall-page">
+        <div class="block-head">
+          <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span>Updates every 30 seconds</p>
+          <h1>The flower wall</h1>
+          <p>Everyone who chose to share it: who sent flowers to whom, how many times, and which blooms. First names only. Notes stay private.</p>
+        </div>
+        <div class="stats" data-stats></div>
+        <div class="wall-tools">
+          <label class="search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <span class="sr-only">Search the wall by name</span>
+            <input id="wallSearch" type="search" placeholder="Search a name…" autocomplete="off">
+          </label>
+          <a href="#/create" class="btn btn-primary btn-small" data-new>Send flowers</a>
+        </div>
+        <ol class="wall-list" id="fullWall"></ol>
+        <p class="wall-empty" id="wallEmpty" hidden></p>
       </div>
     </section>
 
@@ -279,7 +322,8 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/flowers.js?v=3"></script>
-  <script src="js/app.js?v=3"></script>
+  <script src="js/config.js?v=5"></script>
+  <script src="js/flowers.js?v=5"></script>
+  <script src="js/app.js?v=5"></script>
 </body>
 </html>
