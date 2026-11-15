@@ -19,6 +19,7 @@ create index if not exists gifts_pair_idx on public.gifts (lower(sender), lower(
 create index if not exists gifts_created_idx on public.gifts (created_at desc);
 
 -- Visitors may add a gift but can't read, edit or delete raw rows.
+grant usage on schema public to anon, authenticated;
 alter table public.gifts enable row level security;
 drop policy if exists "anyone can add a gift" on public.gifts;
 create policy "anyone can add a gift" on public.gifts for insert to anon with check (true);
