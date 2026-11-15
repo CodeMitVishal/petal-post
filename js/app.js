@@ -6,26 +6,27 @@
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sleep = ms => new Promise(r => setTimeout(r, reduced() ? 0 : ms));
-  const MAX = 12;
+  const MAX_ALL = F.MAX_STEMS; // the Grand size's limit; each size has its own (F.SIZES)
+  const sizeOf = z => F.SIZES[z] || F.SIZES.m;
   const emit = (name, detail = {}) => document.dispatchEvent(new CustomEvent('pp:' + name, { detail }));
 
   /* ================= data ================= */
   const OCCASIONS = [
-    { id: 'love', label: 'Love', emoji: '💗', sub: 'Anniversaries & just us', preset: ['rr', 'rr', 'bb', 'rr', 'rp', 'rr', 'bb'], w: 'blush', r: 'ruby',
+    { id: 'love', label: 'Love', emoji: '💗', sub: 'Anniversaries & just us', preset: ['rr', 'pk', 'bb', 'rr', 'rp', 'cr', 'rr', 'bb'], w: 'blush', r: 'ruby',
       notes: ['Every day with you feels like spring. These are for you. No reason needed, just love.', "If I had a flower for every time I thought of you, I'd walk through my garden forever.", 'You make my whole world bloom. Happy us. ♡'] },
-    { id: 'birthday', label: 'Birthday', emoji: '🎂', sub: 'Another lap round the sun', preset: ['sf', 'dz', 'ty', 'sf', 'dz', 'to'], w: 'kraft', r: 'gold',
+    { id: 'birthday', label: 'Birthday', emoji: '🎂', sub: 'Another lap round the sun', preset: ['sf', 'gp', 'ty', 'go', 'dz', 'sf', 'to'], w: 'kraft', r: 'gold',
       notes: ['Happy birthday! May your year be as bright as these sunflowers.', 'Another trip around the sun, and you just keep getting more wonderful. Have the best day!', 'Wishing you cake, laughter and a whole bouquet of good things this year.'] },
-    { id: 'thanks', label: 'Thank you', emoji: '🙏', sub: 'For the big & little things', preset: ['rp', 'tp', 'rp', 'bb', 'to'], w: 'cream', r: 'lilac',
+    { id: 'thanks', label: 'Thank you', emoji: '🙏', sub: 'For the big & little things', preset: ['rp', 'hb', 'cp', 'bb', 'tp', 'rn'], w: 'cream', r: 'lilac',
       notes: ['Thank you for everything. These blooms are a small way of saying you mean a lot.', "Your kindness didn't go unnoticed. Thank you, truly.", 'For all the little things you do: thank you.'] },
-    { id: 'sorry', label: "I'm sorry", emoji: '🫶', sub: 'Words are hard, flowers help', preset: ['ri', 'lv', 'ri', 'bb', 'lv'], w: 'sage', r: 'ivory',
+    { id: 'sorry', label: "I'm sorry", emoji: '🫶', sub: 'Words are hard, flowers help', preset: ['ri', 'lv', 'hl', 'ri', 'bb', 'fm'], w: 'sage', r: 'ivory',
       notes: ["I'm sorry. You matter more to me than being right. Can we start fresh?", "These can't fix it, but I hope they show how much I care. I'm truly sorry.", "I got it wrong, and I'm sorry. Thank you for your patience with me."] },
-    { id: 'getwell', label: 'Get well', emoji: '🌤️', sub: 'Sunshine for recovery', preset: ['sf', 'dz', 'ly', 'ty', 'dz'], w: 'sage', r: 'gold',
+    { id: 'getwell', label: 'Get well', emoji: '🌤️', sub: 'Sunshine for recovery', preset: ['sf', 'dz', 'go', 'ly', 'ty', 'dz'], w: 'sage', r: 'gold',
       notes: ['Sending a little sunshine your way. Rest up and feel better soon!', 'Get well soon. The world is less bright without you at full power.', 'Thinking of you and wishing you a speedy recovery.'] },
-    { id: 'congrats', label: 'Congrats', emoji: '🎉', sub: 'New job, new home, big win', preset: ['sf', 'ty', 'to', 'ry', 'sf', 'dz'], w: 'midnight', r: 'gold',
+    { id: 'congrats', label: 'Congrats', emoji: '🎉', sub: 'New job, new home, big win', preset: ['sf', 'ty', 'po', 'go', 'ry', 'sf', 'dz'], w: 'midnight', r: 'gold',
       notes: ['You did it! So proud of you. Congratulations!', 'Big news deserves big flowers. Congratulations!', "Here's to you and everything you've worked for. Congrats!"] },
-    { id: 'sympathy', label: 'Thinking of you', emoji: '🕊️', sub: 'Comfort from afar', preset: ['ly', 'ri', 'ly', 'bb', 'lv'], w: 'cream', r: 'ivory',
+    { id: 'sympathy', label: 'Thinking of you', emoji: '🕊️', sub: 'Comfort from afar', preset: ['ly', 'ow', 'ri', 'hb', 'bb', 'eu'], w: 'cream', r: 'ivory',
       notes: ['Thinking of you, and holding you close in my heart.', "There are no right words, so I'm sending flowers and all my love.", "I'm here for you, today and every day after."] },
-    { id: 'just', label: 'Just because', emoji: '✨', sub: 'No reason at all', preset: ['sk', 'tp', 'dz', 'sk', 'rp'], w: 'blush', r: 'lilac',
+    { id: 'just', label: 'Just because', emoji: '✨', sub: 'No reason at all', preset: ['sk', 'rn', 'dz', 'sk', 'pk', 'fm'], w: 'blush', r: 'lilac',
       notes: ['No reason. I just thought of you and wanted to make you smile.', "A little bouquet for a lovely person. That's the whole message.", 'Saw these and thought of you. Have a beautiful day.'] },
   ];
   const OCC = Object.fromEntries(OCCASIONS.map(o => [o.id, o]));
@@ -35,11 +36,26 @@
     get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* private mode */ } },
   };
+  store.del = k => { try { localStorage.removeItem(k); } catch { /* ignore */ } };
   const sess = {
     get(k) { try { return sessionStorage.getItem(k); } catch { return null; } },
     set(k, v) { try { sessionStorage.setItem(k, v); } catch { /* ignore */ } },
     del(k) { try { sessionStorage.removeItem(k); } catch { /* ignore */ } },
   };
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+  const uuid = () => (crypto.randomUUID ? crypto.randomUUID()
+    : '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c => (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)));
+
+  // One anonymous id per browser. It keeps your wall entries and your rate limit separate
+  // from other people, even on the same Wi-Fi or mobile network. It is never linked to a
+  // name, email or IP address, and clearing site data simply makes a new one.
+  const clientId = (() => {
+    const id = store.get('petalpost.cid');
+    if (typeof id === 'string' && UUID_RE.test(id)) return id;
+    const fresh = uuid();
+    store.set('petalpost.cid', fresh);
+    return fresh;
+  })();
   const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
   const randSeed = () => (Math.random() * 1e6) | 0;
 
@@ -58,8 +74,10 @@
   const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
   function sanitize(g) {
     if (!g || typeof g !== 'object') return null;
-    const b = String(g.b || '').split('.').filter(id => F.BY_ID[id]).slice(0, MAX);
+    const z = F.SIZES[g.z] ? g.z : 'm';
+    const b = String(g.b || '').split('.').filter(id => F.BY_ID[id]).slice(0, sizeOf(z).max);
     return {
+      z,
       t: str(g.t, 40), f: str(g.f, 40), m: str(g.m, 300),
       o: OCC[g.o] ? g.o : '',
       b,
@@ -216,6 +234,9 @@
       });
     }
 
+    // Same names from different people are different rows; the server gives each a "pair" id.
+    const pairKey = r => (typeof r.pair === 'string' && r.pair) || `${r.sender}|${r.recipient}`.toLowerCase();
+
     // Round avatar (photo, or a coloured initial) followed by the first name.
     function person(host, name, photoId) {
       const av = document.createElement('span');
@@ -261,7 +282,7 @@
     function renderList(host, list, limit) {
       host.innerHTML = '';
       list.slice(0, limit).forEach((r, i) => {
-        const key = `${r.sender}|${r.recipient}`.toLowerCase();
+        const key = pairKey(r);
         const fresh = loadedOnce && seen.get(key) !== r.last_at;
         const li = item(r, fresh);
         li.style.setProperty('--i', Math.min(i, 12));
@@ -281,7 +302,7 @@
       const msg = $('#wallEmpty');
       msg.hidden = list.length > 0;
       msg.textContent = empty ? 'No bouquets on the wall yet. Send one and be the first.' : `Nobody called “${q}” on the wall yet.`;
-      seen = new Map(rows.map(r => [`${r.sender}|${r.recipient}`.toLowerCase(), r.last_at]));
+      seen = new Map(rows.map(r => [pairKey(r), r.last_at]));
     }
 
     async function load() {
@@ -321,13 +342,14 @@
       if (!recipient || !data.b) return;
       const done = store.get('petalpost.walled') || [];
       if (done.includes(code)) return;
-      const flowers = data.b.split('.').slice(0, MAX);
+      const flowers = data.b.split('.').slice(0, MAX_ALL);
       try {
         await api('gifts', {
           sender: firstName(state.f) || 'Someone', recipient,
           occasion: OCC[data.o] ? data.o : null, stems: flowers.length, flowers: flowers.join('.'),
           sender_photo: Photos.valid(state.ps) ? state.ps : null,
           recipient_photo: Photos.valid(state.pr) ? state.pr : null,
+          sender_key: clientId,
         }, 'return=minimal');
         store.set('petalpost.walled', [...done, code].slice(-50));
         toast(`Added to the flower wall: ${firstName(state.f) || 'Someone'} → ${recipient} 🌸`);
@@ -416,19 +438,21 @@
   })();
 
   /* ================= HOME ================= */
+  // "Grow another" cycles through sizes so visitors see a Posy, a Classic and a Grand.
   const HERO_SETS = [
-    ['rp', 'rr', 'sk', 'dz', 'rr', 'lv', 'bb', 'ty', 'rp'],
-    ['sf', 'dz', 'ty', 'sf', 'to', 'dz', 'bb'],
-    ['tp', 'lv', 'rp', 'sk', 'lv', 'ri', 'bb', 'tp'],
-    ['ly', 'ri', 'rp', 'bb', 'ly', 'lv', 'ri'],
+    { z: 'm', ids: ['rp', 'rr', 'sk', 'dz', 'pk', 'lv', 'bb', 'ty', 'rp'] },
+    { z: 'l', ids: ['pk', 'rr', 'hb', 'ri', 'op', 'cr', 'lv', 'rn', 'bb', 'pk', 'eu', 'rp', 'hl', 'ly', 'rr', 'cp', 'fm', 'eu'] },
+    { z: 's', ids: ['rn', 'pk', 'bb', 'cp', 'fm', 'rn'] },
+    { z: 'm', ids: ['sf', 'go', 'ty', 'gp', 'po', 'dz', 'sf', 'eu'] },
+    { z: 'l', ids: ['ly', 'ow', 'ri', 'hb', 'bb', 'ly', 'eu', 'ri', 'hl', 'op', 'bb', 'ow', 'lv', 'ri'] },
   ];
   let heroIdx = 0;
   function growHero() {
     const set = HERO_SETS[heroIdx % HERO_SETS.length];
-    const wraps = ['blush', 'kraft', 'cream', 'sage'], ribs = ['ruby', 'gold', 'lilac', 'ivory'];
+    const wraps = ['blush', 'cream', 'kraft', 'kraft', 'sage'], ribs = ['ruby', 'ruby', 'lilac', 'gold', 'ivory'];
     const svg = $('#heroSvg');
     svg.classList.remove('anim');
-    svg.innerHTML = F.bouquetSVG(set, { w: wraps[heroIdx % 4], r: ribs[heroIdx % 4], seed: 7 + heroIdx * 13, animate: true, delay: 0.5 });
+    svg.innerHTML = F.bouquetSVG(set.ids, { size: set.z, w: wraps[heroIdx % 5], r: ribs[heroIdx % 5], seed: 7 + heroIdx * 13, animate: true, delay: 0.5 });
     void svg.getBoundingClientRect();
     svg.classList.add('anim');
     heroIdx++;
@@ -484,25 +508,77 @@
   /* ================= BUILDER ================= */
   let uidN = 0;
   const newItem = (id, k = Math.random()) => ({ uid: `u${++uidN}`, id, k });
-  const blankState = () => ({ o: '', items: [], w: 'kraft', r: 'ruby', t: '', f: '', m: '', mAuto: false, d: '', s: randSeed(), step: 0, touched: false, noteIdx: 0, wall: false, p: '', ps: '', pr: '' });
+  const blankState = () => ({ o: '', items: [], aside: [], z: 'm', w: 'kraft', r: 'ruby', t: '', f: '', m: '', mAuto: false, d: '', s: randSeed(), step: 0, touched: false, noteIdx: 0, wall: false, p: '', ps: '', pr: '', mood: 'all' });
   const previews = {}; // local blob previews for photos picked in this session
+  let chosenOpen = false; // "Show all kinds" toggle for the picked-flowers list
+
+  /* Drafts: every tab keeps its own draft, so two bouquets in two tabs (or two people
+     sharing a computer) never overwrite each other. A new tab picks up the newest draft
+     that isn't open anywhere else, and takes it over so no other tab grabs it too. */
+  const DRAFT_INDEX = 'petalpost.drafts';
+  const draftKey = id => 'petalpost.draft.' + id;
+  const aliveKey = id => 'petalpost.alive.' + id;
+  const isAlive = id => { const t = store.get(aliveKey(id)); return typeof t === 'number' && Date.now() - t < 12000; };
+  let tabId = sess.get('pp.tab');
+  if (!UUID_RE.test(tabId || '') || isAlive(tabId)) tabId = uuid(); // a duplicated tab gets its own id
+  sess.set('pp.tab', tabId);
+  const heartbeat = () => store.set(aliveKey(tabId), Date.now());
+  heartbeat();
+  setInterval(heartbeat, 5000);
+  addEventListener('pagehide', () => store.del(aliveKey(tabId)));
+  addEventListener('pageshow', heartbeat);
+
+  // A draft is worth keeping once it has flowers, a name, a note or an occasion.
+  const hasContent = d => !!(d && ((d.items && d.items.length) || d.t || d.f || d.m || d.o));
+
+  function takeDraft() {
+    const own = store.get(draftKey(tabId));
+    if (own) return own;
+    let index = (store.get(DRAFT_INDEX) || []).filter(e => e && UUID_RE.test(e.id) && e.id !== tabId).sort((a, b) => b.t - a.t);
+    for (const e of index) {
+      if (isAlive(e.id)) continue;
+      const d = store.get(draftKey(e.id));
+      store.del(draftKey(e.id));
+      index = index.filter(x => x.id !== e.id);
+      store.set(DRAFT_INDEX, index);
+      if (hasContent(d)) return d;
+    }
+    const legacy = store.get('petalpost.draft'); // saved before per-tab drafts existed
+    store.del('petalpost.draft');
+    return legacy;
+  }
+
   let state = restore();
 
   function restore() {
-    const d = store.get('petalpost.draft');
+    const d = takeDraft();
     const s = blankState();
     if (!d || typeof d !== 'object') return s;
     Object.assign(s, sanitize({ ...d, b: (d.items || []).map(i => i.id).join('.') }));
-    s.items = (d.items || []).filter(i => F.BY_ID[i.id]).slice(0, MAX).map(i => newItem(i.id, +i.k || Math.random()));
+    s.items = (d.items || []).filter(i => F.BY_ID[i.id]).slice(0, sizeOf(s.z).max).map(i => newItem(i.id, +i.k || Math.random()));
+    s.aside = (Array.isArray(d.aside) ? d.aside : []).filter(id => F.BY_ID[id]).slice(0, MAX_ALL);
     s.mAuto = !!d.mAuto; s.touched = !!d.touched; s.wall = !!d.wall;
+    s.mood = d.mood === 'all' || F.MOODS.some(m => m.id === d.mood) ? d.mood : 'all';
     s.ps = Photos.valid(d.ps) ? d.ps : ''; s.pr = Photos.valid(d.pr) ? d.pr : ''; s.step = Math.min(4, Math.max(0, d.step | 0));
     return s;
   }
   function save() {
-    store.set('petalpost.draft', { ...state, items: state.items.map(({ id, k }) => ({ id, k })) });
+    const draft = { ...state, items: state.items.map(({ id, k }) => ({ id, k })) };
+    const now = Date.now();
+    const index = store.get(DRAFT_INDEX) || [];
+    const keep = index.filter(e => e && e.id !== tabId && now - e.t < 14 * 864e5).sort((a, b) => b.t - a.t).slice(0, 7);
+    index.filter(e => e && e.id !== tabId && !keep.includes(e)).forEach(e => store.del(draftKey(e.id)));
+    if (hasContent(draft)) {
+      store.set(draftKey(tabId), draft);
+      store.set(DRAFT_INDEX, [{ id: tabId, t: now }, ...keep]);
+    } else {
+      store.del(draftKey(tabId)); // an empty tab never hides a real draft from later visits
+      store.set(DRAFT_INDEX, keep);
+    }
   }
   const ordered = () => [...state.items].sort((a, b) => a.k - b.k);
-  const giftData = () => ({ v: 1, t: state.t, f: state.f, m: state.m, o: state.o, b: ordered().map(i => i.id).join('.'), w: state.w, r: state.r, d: state.d, s: state.s, ...(Photos.valid(state.p) ? { p: state.p } : {}) });
+  const maxStems = () => sizeOf(state.z).max;
+  const giftData = () => ({ v: 1, z: state.z, t: state.t, f: state.f, m: state.m, o: state.o, b: ordered().map(i => i.id).join('.'), w: state.w, r: state.r, d: state.d, s: state.s, ...(Photos.valid(state.p) ? { p: state.p } : {}) });
   const giftUrl = () => `${location.origin}${location.pathname}#/g/${encode(giftData())}`;
 
   function applyOccasion(id, force) {
@@ -511,6 +587,8 @@
     state.o = id;
     if (force || !state.touched || !state.items.length) {
       state.items = o.preset.map(x => newItem(x));
+      state.aside = [];
+      if (state.z === 's' && state.items.length > sizeOf('s').max) state.z = 'm';
       state.w = o.w; state.r = o.r; state.s = randSeed(); state.touched = false;
     }
     if (force || !state.m || state.mAuto) { state.noteIdx = 0; state.m = o.notes[0]; state.mAuto = true; }
@@ -521,7 +599,42 @@
     if (builderReady) return;
     builderReady = true;
     const svg = $('#builderSvg');
-    svg.innerHTML = F.skeleton(state.w, state.r);
+    svg.innerHTML = F.skeleton(state.w, state.r, state.z);
+
+    // bouquet size: Posy (short), Classic, Grand (tall)
+    const sp = $('#sizePick');
+    Object.values(F.SIZES).forEach(Z => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'size-opt';
+      b.dataset.size = Z.id;
+      b.setAttribute('role', 'radio');
+      b.innerHTML = `${sizeIcon(Z.id)}<span><strong>${Z.name}</strong><small>${{ s: 'Short & sweet', m: 'Just right', l: 'Big & lush' }[Z.id]} · up to ${Z.max}</small></span>`;
+      b.addEventListener('click', () => chooseSize(Z.id, b));
+      sp.appendChild(b);
+    });
+    sp.addEventListener('keydown', e => {
+      const keys = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
+      if (!keys[e.key]) return;
+      e.preventDefault();
+      const order = Object.keys(F.SIZES), i = order.indexOf(state.z);
+      const next = order[(i + keys[e.key] + order.length) % order.length];
+      chooseSize(next, sp.querySelector(`[data-size="${next}"]`));
+      sp.querySelector(`[data-size="${next}"]`).focus();
+    });
+
+    // mood filter for the 28 flowers
+    const mf = $('#moodFilter');
+    [{ id: 'all', name: 'All', ids: F.CATALOG.map(f => f.id) }, ...F.MOODS].forEach(m => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'mood-chip';
+      b.dataset.mood = m.id;
+      b.innerHTML = `<span></span><b>${m.ids.length}</b>`;
+      b.firstChild.textContent = m.name;
+      b.addEventListener('click', () => { state.mood = m.id; save(); renderMood(true); });
+      mf.appendChild(b);
+    });
 
     // occasions
     const oc = $('#occasionChoices');
@@ -550,7 +663,13 @@
       card.title = f.meaning;
       card.innerHTML = `${F.headThumb(f.id)}<strong>${f.name}</strong><small>${f.meaning}</small><span class="count" aria-hidden="true">0</span><button type="button" class="minus" aria-label="Remove one ${f.name}">−</button>`;
       const add = () => {
-        if (state.items.length >= MAX) { toast(`A bouquet holds up to ${MAX} stems. Remove one to add another.`); return; }
+        if (state.items.length >= maxStems()) {
+          const bigger = state.z === 's' ? 'Classic' : state.z === 'm' ? 'Grand' : '';
+          toast(bigger ? `A ${sizeOf(state.z).name} holds ${maxStems()} stems. Switch to ${bigger} for more room.` : `A Grand bouquet holds up to ${maxStems()} stems.`);
+          const sp = $('#sizePick');
+          if (bigger && sp) { sp.classList.remove('nudge'); void sp.offsetWidth; sp.classList.add('nudge'); }
+          return;
+        }
         state.items.push(newItem(f.id));
         state.touched = true;
         card.classList.remove('pulse'); void card.offsetWidth; card.classList.add('pulse');
@@ -565,15 +684,18 @@
 
     $('#surpriseBtn').addEventListener('click', e => {
       const ids = F.CATALOG.map(f => f.id);
-      const n = 5 + ((Math.random() * 5) | 0);
-      const pick = [...ids].sort(() => Math.random() - 0.5).slice(0, 3 + ((Math.random() * 2) | 0));
+      const [lo, hi] = { s: [4, 7], m: [6, 11], l: [12, 22] }[state.z] || [6, 11];
+      const n = lo + ((Math.random() * (hi - lo + 1)) | 0);
+      const pick = [...ids].sort(() => Math.random() - 0.5).slice(0, (state.z === 'l' ? 5 : 3) + ((Math.random() * 2) | 0));
+      state.aside = [];
       state.items = Array.from({ length: n }, () => newItem(pick[(Math.random() * pick.length) | 0]));
       state.s = randSeed(); state.touched = true;
       burstFrom(e.currentTarget, 16);
       renderAll();
     });
     $('#presetBtn').addEventListener('click', () => { state.touched = false; applyOccasion(state.o, false); renderAll(); });
-    $('#clearBtn').addEventListener('click', () => { state.items = []; state.touched = true; renderAll(); });
+    $('#clearBtn').addEventListener('click', () => { state.items = []; state.aside = []; state.touched = true; renderAll(); });
+    $('#chosenMore').addEventListener('click', () => { chosenOpen = !chosenOpen; renderCatalog(); });
     $('#shuffleBtn').addEventListener('click', () => {
       state.s = randSeed();
       state.items.forEach(i => (i.k = Math.random()));
@@ -702,7 +824,9 @@
   function renderPreview() {
     const svg = $('#builderSvg'), layer = $('.stems', svg);
     const list = ordered();
-    const pos = F.layout(list.map(i => i.id), state.s);
+    const pos = F.layout(list.map(i => i.id), state.s, state.z);
+    F.setSize(svg, state.z);
+    $('.preview-card').dataset.size = state.z;
     const present = new Set(list.map(i => i.uid));
     $$('.sg', layer).forEach(g => {
       if (!present.has(g.dataset.uid) && !g.classList.contains('leaving')) {
@@ -724,7 +848,9 @@
     F.recolor(svg, state.w, state.r);
     $('#emptyHint').classList.toggle('gone', list.length > 0);
     const n = list.length;
-    $('#stemCount').textContent = `${n} ${n === 1 ? 'stem' : 'stems'} of ${MAX}`;
+    $('#stemCount').textContent = `${sizeOf(state.z).name} · ${n} ${n === 1 ? 'stem' : 'stems'} of ${maxStems()}`;
+    const meter = $('#stemMeter');
+    if (meter) meter.style.setProperty('--fill', String(Math.min(1, n / maxStems())));
   }
 
   function renderCatalog() {
@@ -747,6 +873,7 @@
       p.querySelector('button').addEventListener('click', () => removeOne(id));
       chosen.appendChild(p);
     });
+    measureChosen();
     const pb = $('#presetBtn');
     pb.hidden = !state.o || !state.touched;
     if (state.o) pb.textContent = `↺ Use ${OCC[state.o].label} bouquet`;
@@ -832,6 +959,7 @@
       b.classList.toggle('done', i < n);
     });
     $('#progressBar').style.width = `${(n / 4) * 100}%`;
+    if (n === 1) requestAnimationFrame(measureChosen);
     $('#backBtn').textContent = n === 0 ? 'Home' : 'Back';
     const next = $('#nextBtn');
     next.hidden = n === 4;
@@ -871,8 +999,85 @@
     });
   }
 
+  // Big bouquets: keep the picked list to two lines so the catalog stays in view.
+  // Measured only while the Flowers step is visible (hidden elements measure as zero).
+  function measureChosen() {
+    const chosen = $('#chosen'), more = $('#chosenMore');
+    if (!chosen || !chosen.offsetParent) return;
+    const kinds = chosen.querySelectorAll('.pill').length;
+    chosen.classList.remove('clipped');
+    chosen.classList.toggle('collapsed', !chosenOpen);
+    const overflowing = chosen.scrollHeight > chosen.clientHeight + 4;
+    chosen.classList.toggle('clipped', !chosenOpen && overflowing);
+    more.hidden = !(overflowing || (chosenOpen && kinds > 6));
+    more.textContent = chosenOpen ? 'Show less' : `Show all ${kinds} kinds`;
+    more.setAttribute('aria-expanded', chosenOpen);
+  }
+
+  // Small icon for each size: a cone with 3, 5 or 7 blooms on longer and longer stems.
+  function sizeIcon(z) {
+    const c = { s: { r: 8, n: 3, top: 25 }, m: { r: 12, n: 5, top: 15 }, l: { r: 16, n: 7, top: 5 } }[z];
+    let stems = '', dots = '';
+    for (let i = 0; i < c.n; i++) {
+      const t = c.n === 1 ? 0 : (i / (c.n - 1)) * 2 - 1, x = 24 + t * c.r, y = c.top + 6 + t * t * 6;
+      stems += `M24,40 L${x.toFixed(1)},${y.toFixed(1)} `;
+      dots += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4.3"/>`;
+    }
+    return `<svg class="size-ico" viewBox="0 0 48 56" aria-hidden="true"><path class="st" d="${stems}"/>${dots}<path class="cone" d="M13,35 L24,53 L35,35 Z"/></svg>`;
+  }
+
+  // Changing size keeps everything that fits; extra stems wait "aside" and come back
+  // automatically when a bigger size is picked again.
+  function chooseSize(z, btn) {
+    if (!F.SIZES[z] || z === state.z) return;
+    const max = sizeOf(z).max;
+    let moved = 0, restored = 0;
+    if (state.items.length > max) {
+      const keep = state.items.slice(0, max), extra = state.items.slice(max);
+      state.aside = [...extra.map(i => i.id), ...state.aside].slice(0, MAX_ALL);
+      state.items = keep;
+      moved = extra.length;
+    } else if (state.aside.length) {
+      const room = max - state.items.length;
+      const back = state.aside.slice(0, room);
+      state.aside = state.aside.slice(room);
+      back.forEach(id => state.items.push(newItem(id)));
+      restored = back.length;
+    }
+    state.z = z;
+    renderAll();
+    emit('size-changed', { z, from: btn });
+    const name = sizeOf(z).name;
+    if (moved) toast(`${name} holds ${max} stems, so ${moved} ${moved === 1 ? 'stem waits' : 'stems wait'} aside. Pick a bigger size to bring ${moved === 1 ? 'it' : 'them'} back.`);
+    else if (restored) toast(`Welcome back: ${restored} ${restored === 1 ? 'stem' : 'stems'} returned to your ${name} bouquet.`);
+  }
+
+  function renderSize() {
+    $$('#sizePick .size-opt').forEach(b => {
+      const on = b.dataset.size === state.z;
+      b.setAttribute('aria-checked', on);
+      b.tabIndex = on ? 0 : -1;
+    });
+    $('#flowersHint').textContent = `Tap to add, up to ${maxStems()} stems for a ${sizeOf(state.z).name}. Hover or focus a flower to see its meaning.`;
+  }
+
+  function renderMood(animate) {
+    const mood = state.mood || 'all';
+    $$('#moodFilter .mood-chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.mood === mood));
+    let i = 0;
+    $$('#catalog .flower').forEach(card => {
+      const show = mood === 'all' || F.BY_ID[card.dataset.id].mood === mood;
+      const was = !card.hidden;
+      card.hidden = !show;
+      if (show && animate && !reduced()) {
+        card.style.setProperty('--fi', i++);
+        card.classList.remove('flower-in'); void card.offsetWidth; card.classList.add('flower-in');
+      } else if (!was && show) card.classList.remove('flower-in');
+    });
+  }
+
   function renderAll() {
-    renderPreview(); renderCatalog(); renderSwatches(); renderTag(false); renderFields(); renderPhotos(); renderSend(); renderSteps(false);
+    renderPreview(); renderSize(); renderMood(false); renderCatalog(); renderSwatches(); renderTag(false); renderFields(); renderPhotos(); renderSend(); renderSteps(false);
     save();
   }
 
@@ -948,12 +1153,12 @@
     side.classList.remove('done');
     const svg = $('#giftSvg');
     svg.classList.remove('anim');
-    svg.innerHTML = F.bouquetSVG(gift.b, { w: gift.w, r: gift.r, seed: gift.s, animate: true, delay: 0.3 });
+    svg.innerHTML = F.bouquetSVG(gift.b, { size: gift.z, w: gift.w, r: gift.r, seed: gift.s, animate: true, delay: 0.3 });
     void svg.getBoundingClientRect();
     svg.classList.add('anim');
     const card = $('#noteCard');
     card.style.animation = 'none'; void card.offsetWidth; card.style.animation = '';
-    const growTime = 0.3 + gift.b.length * 0.13 + 1.2;
+    const growTime = 0.3 + gift.b.length * (gift.b.length > 14 ? 0.08 : 0.13) + 1.2;
     card.style.setProperty('--cd', `${Math.min(growTime, 2.2)}s`);
 
     $('#noteTo').textContent = gift.t || 'you';
@@ -1014,7 +1219,7 @@
     btn.disabled = true;
     try {
       await document.fonts?.ready;
-      const svgStr = F.bouquetSVG(gift.b, { w: gift.w, r: gift.r, seed: gift.s, standalone: true, width: 800 });
+      const svgStr = F.bouquetSVG(gift.b, { size: gift.z, w: gift.w, r: gift.r, seed: gift.s, standalone: true, width: 780 });
       const img = new Image();
       img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
       await img.decode();
@@ -1027,7 +1232,7 @@
       const halo = x.createRadialGradient(W / 2, 360, 20, W / 2, 360, 420);
       halo.addColorStop(0, 'rgba(255,248,236,.95)'); halo.addColorStop(1, 'rgba(255,248,236,0)');
       x.fillStyle = halo; x.fillRect(0, 0, W, 800);
-      x.drawImage(img, 240, 30, 600, 720);
+      x.drawImage(img, 235, 34, 610, 719); // keeps the 390:460 bouquet frame
       // the sender's photo as a tilted polaroid (needs CORS, which Supabase public storage allows)
       const psrc = Photos.url('g', gift.p);
       if (psrc) {

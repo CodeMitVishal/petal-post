@@ -15,16 +15,26 @@ create table if not exists public.gifts (
   sender     text not null check (sender    ~ '^[[:alpha:]][[:alpha:] .''-]{0,19}$'),
   recipient  text not null check (recipient ~ '^[[:alpha:]][[:alpha:] .''-]{0,19}$'),
   occasion   text check (occasion is null or occasion in ('love','birthday','thanks','sorry','getwell','congrats','sympathy','just')),
-  stems      smallint not null check (stems between 1 and 12),
-  flowers    text not null check (flowers ~ '^[a-z]{2}(\.[a-z]{2}){0,11}$')
+  stems      smallint not null check (stems between 1 and 24),
+  flowers    text not null check (flowers ~ '^[a-z]{2}(\.[a-z]{2}){0,23}$')
 );
 alter table public.gifts add column if not exists sender_photo    uuid;
 alter table public.gifts add column if not exists recipient_photo uuid;
 alter table public.gifts add column if not exists ip_hash         text;
+-- Anonymous per-browser id: keeps two different people with the same first names apart
+-- on the wall, and gives each browser its own rate limit (not shared with the whole Wi-Fi).
+alter table public.gifts add column if not exists sender_key      uuid;
+
+-- Grand bouquets hold up to 24 stems (re-applied so older projects upgrade in place).
+alter table public.gifts drop constraint if exists gifts_stems_check;
+alter table public.gifts add constraint gifts_stems_check check (stems between 1 and 24);
+alter table public.gifts drop constraint if exists gifts_flowers_check;
+alter table public.gifts add constraint gifts_flowers_check check (flowers ~ '^[a-z]{2}(\.[a-z]{2}){0,23}$');
 
 create index if not exists gifts_pair_idx    on public.gifts (lower(sender), lower(recipient));
 create index if not exists gifts_created_idx on public.gifts (created_at desc);
 create index if not exists gifts_ip_idx      on public.gifts (ip_hash, created_at desc);
+create index if not exists gifts_key_idx     on public.gifts (sender_key, created_at desc);
 
 -- Visitors may add a gift but can't read, edit or delete rows.
 grant usage on schema public to anon, authenticated;
@@ -32,11 +42,15 @@ alter table public.gifts enable row level security;
 drop policy if exists "anyone can add a gift" on public.gifts;
 create policy "anyone can add a gift" on public.gifts for insert to anon, authenticated with check (true);
 revoke all on public.gifts from anon, authenticated;
-grant insert (sender, recipient, occasion, stems, flowers, sender_photo, recipient_photo) on public.gifts to anon, authenticated;
+grant insert (sender, recipient, occasion, stems, flowers, sender_photo, recipient_photo, sender_key) on public.gifts to anon, authenticated;
 
 -------------------------------------------------------------------------------
--- 2. Rate limits: max 5 wall entries per visitor per 10 minutes, 30 per minute overall.
---    Visitor = salted hash of their IP; the IP itself is never stored.
+-- 2. Rate limits, per person rather than per network:
+--      6 wall entries per browser (sender_key) per 10 minutes,
+--      30 per IP per 10 minutes (loose backstop, so an office or mobile network
+--      shared by many people isn't blocked by one busy sender),
+--      60 per minute overall.
+--    The IP is only kept as a salted hash; the raw IP is never stored.
 -------------------------------------------------------------------------------
 create schema if not exists private;
 revoke all on schema private from public, anon, authenticated;
@@ -57,15 +71,22 @@ declare
   recent int;
 begin
   select count(*) into recent from public.gifts where created_at > now() - interval '1 minute';
-  if recent >= 30 then
+  if recent >= 60 then
     raise exception 'The flower wall is busy, please try again in a minute.' using errcode = 'P0001';
+  end if;
+  if new.sender_key is not null then
+    select count(*) into recent from public.gifts
+      where sender_key = new.sender_key and created_at > now() - interval '10 minutes';
+    if recent >= 6 then
+      raise exception 'You''ve shared lots of bouquets just now, please wait a few minutes.' using errcode = 'P0001';
+    end if;
   end if;
   if ip <> '' then
     new.ip_hash := md5(ip || (select v from private.secrets where k = 'ip_salt'));
     select count(*) into recent from public.gifts
       where ip_hash = new.ip_hash and created_at > now() - interval '10 minutes';
-    if recent >= 5 then
-      raise exception 'Too many bouquets from you in a short time, please wait a few minutes.' using errcode = 'P0001';
+    if recent >= (case when new.sender_key is null then 6 else 30 end) then
+      raise exception 'Lots of bouquets are coming from your network right now, please try again in a few minutes.' using errcode = 'P0001';
     end if;
   else
     new.ip_hash := null;
@@ -90,19 +111,21 @@ as $$
   select json_build_object(
     'bouquets',   count(*),
     'stems',      coalesce(sum(stems), 0),
-    'senders',    count(distinct lower(sender)),
+    'senders',    count(distinct coalesce(sender_key::text, lower(sender))),
     'recipients', count(distinct lower(recipient))
   ) from public.gifts;
 $$;
 
--- One row per sender → recipient pair: how many times, how many stems, latest flowers and photos.
+-- One row per person → recipient: the same first names sent from two different browsers
+-- are two different rows. "pair" is an opaque key for the page (never the sender_key).
 drop function if exists public.gift_wall(int);
 create function public.gift_wall(max_rows int default 24)
-returns table (sender text, recipient text, times bigint, stems bigint, flowers text, occasion text,
+returns table (pair text, sender text, recipient text, times bigint, stems bigint, flowers text, occasion text,
                last_at timestamptz, sender_photo uuid, recipient_photo uuid)
 language sql stable security definer set search_path = ''
 as $$
-  select (array_agg(g.sender    order by g.created_at desc))[1],
+  select left(md5(coalesce(g.sender_key::text, '-') || '|' || lower(g.sender) || '|' || lower(g.recipient)), 16),
+         (array_agg(g.sender    order by g.created_at desc))[1],
          (array_agg(g.recipient order by g.created_at desc))[1],
          count(*),
          sum(g.stems),
@@ -112,7 +135,7 @@ as $$
          (array_agg(g.sender_photo    order by g.created_at desc) filter (where g.sender_photo    is not null))[1],
          (array_agg(g.recipient_photo order by g.created_at desc) filter (where g.recipient_photo is not null))[1]
   from public.gifts g
-  group by lower(g.sender), lower(g.recipient)
+  group by g.sender_key, lower(g.sender), lower(g.recipient)
   order by max(g.created_at) desc
   limit least(greatest(coalesce(max_rows, 24), 1), 200);
 $$;

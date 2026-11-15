@@ -17,8 +17,43 @@
     { id: 'sk', type: 'sakura', name: 'Cherry Blossom', meaning: 'Renewal & gentle beauty', c: { base: '#FBCFDA', dark: '#E594AB', light: '#FFF0F4' } },
     { id: 'ly', type: 'lily', name: 'White Lily', meaning: 'Peace & sympathy', c: { base: '#FFF9F1', dark: '#DCCBB2', light: '#D7E6A6' } },
     { id: 'bb', type: 'babysbreath', name: "Baby's Breath", meaning: 'Everlasting love', c: { base: '#FFFFFF', dark: '#D6CFC3', light: '#F7F3EC' } },
+    { id: 'pk', type: 'peony', name: 'Pink Peony', meaning: 'Romance & a happy life', c: { base: '#F7A1B8', dark: '#D96E8C', light: '#FFD0DC' } },
+    { id: 'pc', type: 'peony', name: 'Coral Peony', meaning: 'Good fortune & joy', c: { base: '#FF9A86', dark: '#E06A55', light: '#FFC9BC' } },
+    { id: 'cr', type: 'carnation', name: 'Red Carnation', meaning: 'Deep love & admiration', c: { base: '#E0344F', dark: '#A81E36', light: '#F7738A' } },
+    { id: 'cp', type: 'carnation', name: 'Pink Carnation', meaning: "Gratitude & a mother's love", c: { base: '#F7B2C6', dark: '#E07F9D', light: '#FFE0EA' } },
+    { id: 'rn', type: 'ranunculus', name: 'Peach Ranunculus', meaning: "You're radiant & charming", c: { base: '#FFC2A6', dark: '#E99A7C', light: '#FFE2D4' } },
+    { id: 'pr', type: 'poppy', name: 'Red Poppy', meaning: 'Remembrance & dreams', c: { base: '#E8402F', dark: '#B22A1E', light: '#FF7A66' } },
+    { id: 'po', type: 'poppy', name: 'Orange Poppy', meaning: 'Imagination & success', c: { base: '#FF9B3D', dark: '#E0741A', light: '#FFC47F' } },
+    { id: 'go', type: 'gerbera', name: 'Orange Gerbera', meaning: 'Cheer & warm energy', c: { base: '#FF8A3D', dark: '#E5671C', light: '#FFD24A' } },
+    { id: 'gp', type: 'gerbera', name: 'Pink Gerbera', meaning: 'Playful joy', c: { base: '#FF6FA0', dark: '#E04C80', light: '#FFD24A' } },
+    { id: 'hb', type: 'hydrangea', name: 'Blue Hydrangea', meaning: 'Heartfelt gratitude', c: { base: '#8FB3E8', dark: '#5E86C9', light: '#C9DCF7' } },
+    { id: 'hl', type: 'hydrangea', name: 'Lilac Hydrangea', meaning: 'Grace & understanding', c: { base: '#C3A6E3', dark: '#9978C6', light: '#E6D8F5' } },
+    { id: 'fm', type: 'forgetmenot', name: 'Forget-me-not', meaning: 'True love & memories', c: { base: '#7FB2F0', dark: '#5A8FD6', light: '#F7D04A' } },
+    { id: 'op', type: 'orchid', name: 'Purple Orchid', meaning: 'Luxury & admiration', c: { base: '#C58BD9', dark: '#8E4FA8', light: '#EBCDF2' } },
+    { id: 'ow', type: 'orchid', name: 'White Orchid', meaning: 'Elegance & reverence', c: { base: '#FFFDF8', dark: '#D9CDB9', light: '#F3E6F5', accent: '#E79AB8' } },
+    { id: 'eu', type: 'eucalyptus', name: 'Eucalyptus', meaning: 'Protection & healing', c: { base: '#9DB8A4', dark: '#7E9C86', light: '#C9D9CC' } },
+  ];
+  // Mood groups for the catalog filter.
+  const MOODS = [
+    { id: 'romantic', name: 'Romantic', ids: ['rr', 'rp', 'pk', 'pc', 'cr', 'cp', 'rn'] },
+    { id: 'cheerful', name: 'Cheerful', ids: ['ry', 'ty', 'to', 'dz', 'sf', 'pr', 'po', 'go', 'gp'] },
+    { id: 'calm', name: 'Calm', ids: ['lv', 'sk', 'hb', 'hl', 'fm'] },
+    { id: 'elegant', name: 'Elegant', ids: ['ri', 'tp', 'ly', 'op', 'ow'] },
+    { id: 'green', name: 'Fillers', ids: ['bb', 'eu'] },
   ];
   const BY_ID = Object.fromEntries(CATALOG.map(f => [f.id, f]));
+  MOODS.forEach(m => m.ids.forEach(id => (BY_ID[id].mood = m.id)));
+
+  // Bouquet sizes: Posy is short and compact, Grand is tall with a third row.
+  const SIZES = {
+    s: { id: 's', name: 'Posy', max: 7, wrap: 0.8, dome: 24, step: 7, single: 168,
+         rows: [{ R: 176, max: 26, s: 1.18 }, { R: 140, max: 20, s: 1.1 }] },
+    m: { id: 'm', name: 'Classic', max: 12, wrap: 1, dome: 36, step: 7.5, single: 236,
+         rows: [{ R: 256, max: 34, s: 1.32 }, { R: 196, max: 28, s: 1.2 }] },
+    l: { id: 'l', name: 'Grand', max: 24, wrap: 1.14, dome: 44, step: 6.5, single: 270,
+         rows: [{ R: 300, max: 36, s: 1.28 }, { R: 248, max: 33, s: 1.22 }, { R: 196, max: 28, s: 1.14 }] },
+  };
+  const MAX_STEMS = 24;
 
   const WRAPS = {
     kraft: { name: 'Kraft', base: '#D3A877', dark: '#B4865A', light: '#EBD3B4' },
@@ -114,10 +149,93 @@
       pts.forEach(([x, y], i) => (s += `<circle cx="${x}" cy="${y}" r="${2.6 + (i % 3) * 0.5}" fill="${c.base}" stroke="${c.dark}" stroke-width=".6"/>`));
       return s;
     },
+    peony(c) {
+      let s = `<circle r="27" fill="${c.dark}"/>`;
+      const outer = 'M0,0 C-15,-3 -17,-25 -6,-28 C-1,-30 5,-30 10,-27 C18,-22 13,-4 0,0Z';
+      for (let k = 0; k < 8; k++) s += `<path d="${outer}" fill="${c.base}" stroke="${c.dark}" stroke-width=".9" ${rot(k * 45)}/>`;
+      for (let k = 0; k < 7; k++) s += `<path d="${outer}" fill="${c.light}" stroke="${c.dark}" stroke-width=".8" transform="rotate(${k * 51 + 20}) scale(.72)"/>`;
+      for (let k = 0; k < 6; k++) s += `<path d="${outer}" fill="${c.base}" stroke="${c.dark}" stroke-width=".8" transform="rotate(${k * 60 + 8}) scale(.46)"/>`;
+      s += `<path d="M-4,-2 C-2,-6 3,-6 4,-1 C5,3 0,5 -3,3" fill="none" stroke="${c.dark}" stroke-width="1.3" stroke-linecap="round"/>`;
+      return s;
+    },
+    carnation(c) {
+      const frill = 'M0,0 L-8,-17 L-6,-21 L-3.5,-18 L-1.5,-22.5 L0.5,-18.5 L3,-22 L5,-18 L7.5,-20.5 L8,-16 Z';
+      let s = '';
+      for (let k = 0; k < 12; k++) s += `<path d="${frill}" fill="${c.dark}" transform="rotate(${k * 30}) scale(1.15)"/>`;
+      for (let k = 0; k < 12; k++) s += `<path d="${frill}" fill="${c.base}" transform="rotate(${k * 30 + 15}) scale(.92)"/>`;
+      for (let k = 0; k < 9; k++) s += `<path d="${frill}" fill="${c.light}" transform="rotate(${k * 40 + 5}) scale(.58)"/>`;
+      return s + `<circle r="3" fill="${c.dark}"/>`;
+    },
+    ranunculus(c) {
+      let s = '';
+      [26, 22, 18, 14.5, 11, 8, 5].forEach((r, i) => {
+        s += `<circle cy="${-(26 - r) * 0.18}" r="${r}" fill="${i % 2 ? c.light : c.base}" stroke="${c.dark}" stroke-width=".9"/>`;
+      });
+      return s + `<circle cy="-4.3" r="2.6" fill="#8DAA6B"/>`;
+    },
+    poppy(c) {
+      let s = '';
+      for (let k = 0; k < 4; k++) s += `<ellipse cy="-12" rx="15" ry="14" fill="${c.base}" stroke="${c.dark}" stroke-width=".9" ${rot(k * 90 + 45)}/>`;
+      for (let k = 0; k < 4; k++) s += `<ellipse cy="-9" rx="11" ry="10" fill="${c.light}" opacity=".55" ${rot(k * 90)}/>`;
+      for (let k = 0; k < 14; k++) s += `<circle cx="0" cy="-10" r="1.4" fill="#2E2226" ${rot(k * 360 / 14)}/>`;
+      return s + `<circle r="6.5" fill="#3A2C30"/><circle r="2.5" fill="#6B8F55"/>`;
+    },
+    gerbera(c) {
+      const petal = 'M0,-8 C3,-14 3,-24 0,-29 C-3,-24 -3,-14 0,-8Z';
+      let s = '';
+      for (let k = 0; k < 22; k++) s += `<path d="${petal}" fill="${c.dark}" ${rot(k * 360 / 22 + 8)}/>`;
+      for (let k = 0; k < 22; k++) s += `<path d="${petal}" fill="${c.base}" transform="rotate(${k * 360 / 22}) scale(.8)"/>`;
+      return s + `<circle r="9" fill="#4A3020"/><circle r="9" fill="none" stroke="${c.light}" stroke-width="2.6" stroke-dasharray="2 2.2"/><circle r="4" fill="#2E1D12"/>`;
+    },
+    hydrangea(c) {
+      const pts = [[0, 0], [11, 0], [-11, 0], [5.5, 9.5], [-5.5, 9.5], [5.5, -9.5], [-5.5, -9.5], [16.5, -9.5], [-16.5, -9.5], [16.5, 9.5], [-16.5, 9.5], [0, -19], [11, -19], [-11, -19], [0, 19], [11, 18], [-11, 18], [22, 0], [-22, 0]];
+      let s = `<circle r="26" fill="${c.dark}" opacity=".55"/>`;
+      pts.forEach(([x, y], i) => {
+        const col = i % 3 === 0 ? c.light : i % 3 === 1 ? c.base : c.dark;
+        s += `<g transform="translate(${x},${y}) rotate(${(i * 23) % 90})">`;
+        for (let k = 0; k < 4; k++) s += `<ellipse cy="-3.6" rx="3.4" ry="4.4" fill="${col}" stroke="${c.dark}" stroke-width=".4" ${rot(k * 90)}/>`;
+        s += `<circle r="1.2" fill="#fff" opacity=".85"/></g>`;
+      });
+      return s;
+    },
+    forgetmenot(c) {
+      const spots = [[0, 0, 1], [-12, -6, 0.85], [11, -8, 0.9], [-4, -17, 0.8], [9, 7, 0.75], [-10, 9, 0.7], [3, -27, 0.6]];
+      let s = '';
+      spots.forEach(([x, y]) => (s += `<path d="M0,12 Q${x * 0.4},${(y + 12) / 2} ${x},${y}" stroke="#6E8F5A" stroke-width=".9" fill="none"/>`));
+      spots.forEach(([x, y, k]) => {
+        s += `<g transform="translate(${x},${y}) scale(${k})">`;
+        for (let p = 0; p < 5; p++) s += `<circle cy="-4" r="3.9" fill="${c.base}" stroke="${c.dark}" stroke-width=".5" ${rot(p * 72)}/>`;
+        s += `<circle r="2.2" fill="#fff"/><circle r="1.3" fill="${c.light}"/></g>`;
+      });
+      return s;
+    },
+    orchid(c) {
+      const lip = c.accent || c.dark;
+      let s = '';
+      [0, 125, 235].forEach(a => (s += `<ellipse cy="-15" rx="6" ry="16" fill="${c.light}" stroke="${c.dark}" stroke-width=".7" ${rot(a)}/>`));
+      s += `<ellipse cx="-12" cy="-5" rx="12" ry="13" fill="${c.base}" stroke="${c.dark}" stroke-width=".8" transform="rotate(-28 -12 -5)"/>`;
+      s += `<ellipse cx="12" cy="-5" rx="12" ry="13" fill="${c.base}" stroke="${c.dark}" stroke-width=".8" transform="rotate(28 12 -5)"/>`;
+      [[-14, -6], [-10, -1], [14, -6], [10, -1], [-16, -1], [16, -1]].forEach(([x, y]) => (s += `<circle cx="${x}" cy="${y}" r="1.1" fill="${lip}" opacity=".55"/>`));
+      s += `<path d="M-7,3 C-11,13 -5,21 0,21 C5,21 11,13 7,3 C4,7 -4,7 -7,3Z" fill="${lip}"/>`;
+      return s + `<ellipse cy="-1" rx="3" ry="4.2" fill="#fff"/><circle cy="-2" r="1.2" fill="#F7C948"/>`;
+    },
+    eucalyptus(c) {
+      let s = `<path d="M0,6 L0,-58" stroke="#6F8C78" stroke-width="2" stroke-linecap="round"/>`;
+      for (let i = 0; i < 7; i++) {
+        const y = -2 - i * 8.5, k = 1 - i * 0.07;
+        s += `<circle cx="${-6.5 * k}" cy="${y}" r="${5.6 * k}" fill="${i % 2 ? c.base : c.dark}" stroke="${c.light}" stroke-width=".5"/>`;
+        s += `<circle cx="${6.5 * k}" cy="${y - 4}" r="${5.6 * k}" fill="${i % 2 ? c.dark : c.base}" stroke="${c.light}" stroke-width=".5"/>`;
+      }
+      return s;
+    },
   };
 
-  const TYPE_SCALE = { sunflower: 1.12, lily: 1.08, babysbreath: 1.05 };
-  const THUMB_VB = { lavender: '-30 -66 60 76', tulip: '-28 -36 56 52', sakura: '-30 -32 60 50', babysbreath: '-26 -30 52 48' };
+  const TYPE_SCALE = { sunflower: 1.12, lily: 1.08, babysbreath: 1.05, peony: 1.12, hydrangea: 1.06, gerbera: 1.04 };
+  const THUMB_VB = {
+    lavender: '-30 -66 60 76', eucalyptus: '-30 -66 60 76', tulip: '-28 -36 56 52', sakura: '-30 -32 60 50',
+    babysbreath: '-26 -30 52 48', forgetmenot: '-24 -36 48 52', orchid: '-30 -34 60 60',
+  };
+  const UPRIGHT = { tulip: 1, lavender: 1, eucalyptus: 1 }; // heads that follow the stem direction
 
   function headThumb(id) {
     const f = BY_ID[id];
@@ -135,21 +253,23 @@
     };
   }
 
-  // Back row (tall) gets even positions, front row (short) odd ones; heads sit on a dome.
-  function layout(ids, seed) {
+  // Stems are dealt round-robin into rows (tallest first); heads sit on a dome.
+  // Posy and Classic use two rows, Grand uses three once it has more than 8 stems.
+  function layout(ids, seed, size) {
+    const Z = SIZES[size] || SIZES.m;
     const n = ids.length, out = new Array(n), r = rng(seed || 1);
     const all = ids.map((_, i) => i);
-    const rows = n <= 3 ? [all, []] : [all.filter(i => i % 2 === 0), all.filter(i => i % 2 === 1)];
-    const cfg = [{ R: n <= 3 ? 236 : 256, max: 34, s: 1.32 }, { R: 196, max: 28, s: 1.2 }];
+    const k = n <= 3 ? 1 : Z.rows.length === 3 && n <= 8 ? 2 : Z.rows.length;
+    const rows = Array.from({ length: k }, (_, row) => all.filter(i => i % k === row));
     rows.forEach((idxs, row) => {
-      const m = idxs.length, c = cfg[row];
-      const half = Math.min(c.max, 7.5 * (m - 1));
+      const m = idxs.length, c = k === 1 ? { ...Z.rows[0], R: Z.single } : Z.rows[row];
+      const half = Math.min(c.max, Z.step * (m - 1));
       idxs.forEach((idx, j) => {
         const t = m > 1 ? (j / (m - 1)) * 2 - 1 : 0;
         const type = BY_ID[ids[idx]].type;
         out[idx] = {
           a: t * half + (r() - 0.5) * 5,
-          r: c.R - t * t * 36 + (r() - 0.5) * 12,
+          r: c.R - t * t * Z.dome + (r() - 0.5) * 12,
           s: c.s * (TYPE_SCALE[type] || 1) * (0.95 + r() * 0.1),
           row,
           leaf: idx % 3 === 1 ? (r() < 0.5 ? -1 : 1) : 0,
@@ -166,7 +286,7 @@
   const n1 = v => Math.round(v * 10) / 10;
   function headTransform(id, p) {
     const type = BY_ID[id].type;
-    const tilt = type === 'tulip' || type === 'lavender' ? 0 : type === 'lily' ? -p.a * 0.3 : -p.a * 0.55;
+    const tilt = UPRIGHT[type] ? 0 : type === 'lily' || type === 'orchid' ? -p.a * 0.3 : -p.a * 0.55;
     return `translate(0px,${n1(-p.r)}px) rotate(${n1(tilt)}deg) scale(${n1(p.s * 100) / 100})`;
   }
   const groupTransform = p => `translate(${G.x}px,${G.y}px) rotate(${n1(p.a)}deg)`;
@@ -223,20 +343,38 @@
     `<path data-tone="dark" d="M200,410 C190,402 176,400 172,407 M200,410 C210,402 224,400 228,407" style="stroke:${r.dark}" stroke-width="1.5" fill="none"/>` +
     `<ellipse data-tone="dark" cx="200" cy="411" rx="6.5" ry="5.5" style="fill:${r.dark}"/></g></g>`;
 
+  // The paper, greenery and ribbon scale around the gathering point with the bouquet size.
+  const scaleStyle = size => {
+    const k = (SIZES[size] || SIZES.m).wrap;
+    return `transform:translate(${G.x}px,${G.y}px) scale(${k}) translate(${-G.x}px,${-G.y}px)`;
+  };
+  const VIEWBOX = '5 25 390 460';
+
   function bouquetSVG(ids, o = {}) {
     const w = WRAPS[o.w] || WRAPS.kraft, rb = RIBBONS[o.r] || RIBBONS.ruby;
-    const pos = layout(ids, o.seed);
+    const pos = layout(ids, o.seed, o.size);
     const order = drawOrder(pos);
+    const step = ids.length > 14 ? 0.08 : 0.13;
     const start = o.delay || 0.35;
     let stems = '';
-    order.forEach((idx, k) => (stems += stemMarkup(ids[idx], pos[idx], { animate: o.animate, delay: start + k * 0.13 })));
-    const inner = greens() + wrapBack(w) + `<g class="stems">${stems}</g>` + wrapFront(w) + ribbon(rb, start + ids.length * 0.13 + 0.5);
+    order.forEach((idx, k) => (stems += stemMarkup(ids[idx], pos[idx], { animate: o.animate, delay: start + k * step })));
+    const sc = scaleStyle(o.size);
+    const inner = `<g class="scale-group" style="${sc}">${greens()}${wrapBack(w)}</g>` + `<g class="stems">${stems}</g>` +
+      `<g class="scale-group" style="${sc}">${wrapFront(w)}${ribbon(rb, start + ids.length * step + 0.5)}</g>`;
     if (!o.standalone) return inner;
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" width="${o.width || 800}" height="${(o.width || 800) * 1.2}">${inner}</svg>`;
+    const W = o.width || 780;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${VIEWBOX}" width="${W}" height="${Math.round(W * 460 / 390)}">${inner}</svg>`;
   }
 
-  function skeleton(wKey, rKey) {
-    return greens() + wrapBack(WRAPS[wKey]) + '<g class="stems"></g>' + wrapFront(WRAPS[wKey]) + ribbon(RIBBONS[rKey], 0.6);
+  function skeleton(wKey, rKey, size) {
+    const sc = scaleStyle(size);
+    return `<g class="scale-group" style="${sc}">${greens()}${wrapBack(WRAPS[wKey])}</g><g class="stems"></g>` +
+      `<g class="scale-group" style="${sc}">${wrapFront(WRAPS[wKey])}${ribbon(RIBBONS[rKey], 0.6)}</g>`;
+  }
+
+  function setSize(svg, size) {
+    const sc = scaleStyle(size).replace('transform:', '');
+    svg.querySelectorAll('.scale-group').forEach(g => (g.style.transform = sc));
   }
 
   function recolor(svg, wKey, rKey) {
@@ -248,5 +386,8 @@
     });
   }
 
-  window.Flora = { CATALOG, BY_ID, WRAPS, RIBBONS, HEADS, headThumb, layout, drawOrder, stemMarkup, applyPos, bouquetSVG, skeleton, recolor };
+  window.Flora = {
+    CATALOG, BY_ID, MOODS, SIZES, MAX_STEMS, WRAPS, RIBBONS, HEADS, VIEWBOX,
+    headThumb, layout, drawOrder, stemMarkup, applyPos, bouquetSVG, skeleton, setSize, recolor,
+  };
 })();

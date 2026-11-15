@@ -15,8 +15,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=10">
-  <link rel="stylesheet" href="css/motion.css?v=10">
+  <link rel="stylesheet" href="css/styles.css?v=14">
+  <link rel="stylesheet" href="css/motion.css?v=14">
 </head>
 <body>
   <canvas id="petals" aria-hidden="true"></canvas>
@@ -55,7 +55,7 @@
         <div class="hero-art" data-reveal>
           <div class="arch" id="heroCard">
             <div class="sun" aria-hidden="true"></div>
-            <svg id="heroSvg" class="bouquet" viewBox="20 50 360 430" role="img" aria-label="An animated bouquet of roses, tulips, daisies and lavender"></svg>
+            <svg id="heroSvg" class="bouquet" viewBox="5 25 390 460" role="img" aria-label="An animated bouquet of roses, tulips, daisies and lavender"></svg>
             <div class="floating-tag" aria-hidden="true"><span>To</span> you ♡</div>
           </div>
           <button class="chip-btn" id="heroReplay" type="button" aria-label="Grow a new bouquet">
@@ -128,7 +128,7 @@
       <div class="builder wrap">
         <div class="preview-col">
           <div class="preview-card">
-            <svg id="builderSvg" class="bouquet anim" viewBox="20 50 360 430" role="img" aria-label="Your bouquet preview"></svg>
+            <svg id="builderSvg" class="bouquet anim" viewBox="5 25 390 460" role="img" aria-label="Your bouquet preview"></svg>
             <div class="empty-hint" id="emptyHint">
               <p>Your bouquet is waiting for its first flower.</p>
             </div>
@@ -136,7 +136,7 @@
             <div class="preview-photo" id="previewPhoto" hidden><img alt="Your photo for the note"></div>
           </div>
           <div class="preview-tools">
-            <span id="stemCount" aria-live="polite">0 stems</span>
+            <span class="stem-status"><span id="stemCount" aria-live="polite">0 stems</span><span class="stem-meter" id="stemMeter" aria-hidden="true"><i></i></span></span>
             <button class="chip-btn" id="shuffleBtn" type="button">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               Rearrange
@@ -163,13 +163,17 @@
 
             <div class="step" data-step="1">
               <h2>Pick your flowers</h2>
-              <p class="hint">Tap to add, up to 12 stems. Hover or focus a flower to see its meaning.</p>
+              <p class="field-label size-label" id="sizeLabel">Bouquet size</p>
+              <div class="size-pick" id="sizePick" role="radiogroup" aria-labelledby="sizeLabel"></div>
+              <p class="hint" id="flowersHint">Tap to add flowers. Hover or focus a flower to see its meaning.</p>
               <div class="chosen" id="chosen" aria-live="polite"></div>
+              <button class="chosen-more" id="chosenMore" type="button" aria-controls="chosen" hidden></button>
               <div class="row-actions">
                 <button class="chip-btn" id="surpriseBtn" type="button">✦ Surprise me</button>
                 <button class="chip-btn" id="presetBtn" type="button" hidden></button>
                 <button class="chip-btn subtle" id="clearBtn" type="button">Clear</button>
               </div>
+              <div class="mood-filter" id="moodFilter" role="toolbar" aria-label="Filter flowers by mood"></div>
               <div class="catalog" id="catalog"></div>
             </div>
 
@@ -337,7 +341,7 @@
         <div class="reveal" id="reveal" hidden>
           <div class="reveal-art">
             <div class="halo" aria-hidden="true"></div>
-            <svg id="giftSvg" class="bouquet anim" viewBox="20 50 360 430" role="img" aria-label="Your bouquet"></svg>
+            <svg id="giftSvg" class="bouquet anim" viewBox="5 25 390 460" role="img" aria-label="Your bouquet"></svg>
           </div>
           <div class="reveal-side">
             <article class="note-card" id="noteCard">
@@ -366,9 +370,9 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/config.js?v=10"></script>
-  <script src="js/flowers.js?v=10"></script>
-  <script src="js/app.js?v=10"></script>
-  <script src="js/motion.js?v=10"></script>
+  <script src="js/config.js?v=14"></script>
+  <script src="js/flowers.js?v=14"></script>
+  <script src="js/app.js?v=14"></script>
+  <script src="js/motion.js?v=14"></script>
 </body>
 </html>

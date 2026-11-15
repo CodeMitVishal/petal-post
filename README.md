@@ -9,7 +9,9 @@ Petal Post lets you build a bouquet, write a note and send it as a link. When yo
 | Who | Need | How Petal Post handles it |
 | --- | --- | --- |
 | Sender in a hurry | Send something thoughtful in under a minute | Pick an **occasion** (Love, Birthday, Thank you, Sorry, Get well, Congrats, Thinking of you, Just because) to get a ready-made bouquet, wrap and note. |
-| Sender who wants it personal | Choose the exact flowers | 13 flowers, up to 12 stems. Each shows its **meaning** (e.g. red rose: deep love). Rearrange, "Surprise me", remove single stems. |
+| Sender who wants it personal | Choose the exact flowers | **28 flowers** (roses, peonies, hydrangeas, orchids, gerberas, poppies, eucalyptus…) with a **mood filter** (Romantic, Cheerful, Calm, Elegant, Fillers). Each shows its **meaning**. Rearrange, "Surprise me", remove single stems. |
+| Sender who wants it small or grand | Pick a size | **Posy** (short, up to 7 stems), **Classic** (up to 12) or **Grand** (tall, three rows, up to 24). Shrinking keeps extra stems aside and brings them back when you size up again. |
+| Two people, one computer or network | Never collide | Each tab keeps its **own draft**, so two bouquets in two tabs don't overwrite each other; a new tab resumes the newest draft that isn't open elsewhere. On the wall, each browser has an **anonymous id**, so two different "Sam → Maya" senders stay separate rows and only the busy browser gets rate-limited, not everyone on the same Wi-Fi. |
 | Sender lost for words | Help writing the note | **Inspire me** cycles through notes written for the chosen occasion. 280-character limit with a live counter. |
 | Sender planning ahead | Deliver on the day | **Surprise date**: the envelope stays sealed with a live countdown until that day. |
 | Sender before sharing | See what they'll see | **Preview as them** opens the recipient view, with a "Back to editing" button. |
@@ -32,14 +34,14 @@ GitHub Pages can't store data, so the wall uses a free [Supabase](https://supaba
 3. In **Project Settings → API** (or **Connect**), copy the **Project URL** and the **anon public** (or **publishable**) key.
 4. Paste both into [`js/config.js`](js/config.js), then commit and push.
 
-What the database allows: visitors can **add** a gift (first names checked against letters only, max 20 chars, 1–12 stems) and read two summaries, `gift_stats()` for the totals and `gift_wall()` for one row per sender → recipient pair with counts. Raw rows can't be read, edited or deleted from the site. To remove an entry, delete it in Supabase's **Table Editor**.
+What the database allows: visitors can **add** a gift (first names checked against letters only, max 20 chars, 1–24 stems) and read two summaries, `gift_stats()` for the totals and `gift_wall()` for one row per person → recipient with counts (people are told apart by an anonymous per-browser id that is never returned to the page). Raw rows can't be read, edited or deleted from the site. To remove an entry, delete it in Supabase's **Table Editor**.
 
 ## Security
 
 - **No HTML injection:** everything people type (names, notes, wall data) is inserted with `textContent`. Gift links are validated field by field (known flower codes, lengths, UUID photo ids).
 - **Content Security Policy:** scripts only from this site; network and images only from Supabase; no plugins, forms or `<base>` tags.
 - **Database:** visitors can only *add* wall entries (specific columns) and read two summaries. Raw rows, the IP salt and anything else are off limits. Names, flower codes and photo ids are validated in Postgres.
-- **Rate limits:** max 5 wall entries per visitor per 10 minutes and 30 per minute overall. Visitors are identified by a salted hash of their IP, so raw IPs are never stored. Photos: 20 per minute and 400 per day overall.
+- **Rate limits (per person, not per network):** 6 wall entries per browser every 10 minutes; a loose 30 per IP every 10 minutes as a backstop, so an office or mobile network shared by many people isn't blocked by one busy sender; 60 per minute overall. IPs are only stored as salted hashes. Photos: 20 per minute and 400 per day overall.
 - **Photos:** re-encoded in the browser, which strips GPS and camera data, and resized (max 1200 px, under 1 MB). The bucket only accepts JPEGs under random UUID names. Visitors can't list, overwrite or delete files.
 - **Known limits:** the note travels inside the link, so the surprise date is a playful lock, not encryption. There's no automatic moderation of names or photos: remove entries in Supabase's Table Editor and photos in Storage. Photo links are unguessable but public to anyone who has them.
 

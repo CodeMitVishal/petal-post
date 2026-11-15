@@ -648,3 +648,58 @@ p { margin: 0; }
   .note-photo { margin: -40px -14px 8px 12px; width: 42%; }
   .photo-drop { width: 96px; height: 96px; }
 }
+
+/* ---------- bouquet sizes ---------- */
+.scale-group { transition: transform .8s var(--spring); }
+.size-label { margin: 2px 0 8px; }
+.size-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+.size-opt {
+  display: flex; align-items: center; gap: 10px; text-align: left; padding: 10px 12px; border-radius: 16px; cursor: pointer;
+  border: 1.5px solid var(--line); background: var(--bg); transition: border-color .2s, background .2s, transform .3s var(--spring), box-shadow .3s;
+}
+.size-opt:hover { transform: translateY(-2px); border-color: #E5C9C0; background: var(--paper); }
+.size-opt strong { display: block; font-size: .95rem; }
+.size-opt small { display: block; color: var(--muted); font-size: .74rem; line-height: 1.3; }
+.size-opt[aria-checked="true"] { border-color: var(--rose); background: var(--blush-2); box-shadow: 0 0 0 3px color-mix(in srgb, var(--rose) 15%, transparent); }
+.size-ico { width: 38px; height: 44px; flex: none; overflow: visible; }
+.size-ico .st { stroke: var(--sage); stroke-width: 1.6; fill: none; stroke-linecap: round; }
+.size-ico circle { fill: #E9A9B8; transform-box: fill-box; transform-origin: center; transition: fill .3s, transform .4s var(--spring); }
+.size-ico .cone { fill: #D9B48C; }
+.size-opt[aria-checked="true"] .size-ico circle { fill: var(--rose); }
+.size-opt:hover .size-ico circle, .size-opt[aria-checked="true"] .size-ico circle { transform: scale(1.18); }
+.size-opt[aria-checked="true"] .size-ico { animation: sizeBounce .6s var(--spring); }
+@keyframes sizeBounce { 40% { transform: translateY(-4px) scale(1.06); } }
+.size-pick.nudge { animation: nudge .6s var(--spring); }
+@keyframes nudge { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+.stem-status { display: inline-flex; align-items: center; gap: 10px; }
+.stem-meter { --fill: 0; width: 70px; height: 6px; border-radius: 6px; background: var(--line); overflow: hidden; }
+.stem-meter i { display: block; height: 100%; width: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--rose), #F08A9B); transform-origin: 0 50%; transform: scaleX(var(--fill)); transition: transform .5s var(--spring); }
+
+/* picked list: two lines, then "Show all" */
+.chosen.collapsed { max-height: 76px; overflow: hidden; }
+.chosen.clipped { -webkit-mask-image: linear-gradient(#000 55%, transparent); mask-image: linear-gradient(#000 55%, transparent); }
+.chosen-more { border: 0; background: none; padding: 0; margin: -4px 0 12px; color: var(--rose-deep); font-weight: 600; font-size: .85rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---------- mood filter ---------- */
+.mood-filter { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 12px; margin: 0 -2px 4px; scrollbar-width: none; scroll-snap-type: x proximity; }
+.mood-filter::-webkit-scrollbar { display: none; }
+.mood-chip {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px; cursor: pointer; scroll-snap-align: start;
+  border: 1px solid var(--line); background: var(--paper); font-size: .86rem; font-weight: 500; color: var(--ink);
+  transition: background .2s, color .2s, border-color .2s, transform .25s var(--spring);
+}
+.mood-chip b { font-size: .72rem; min-width: 20px; padding: 1px 6px; border-radius: 10px; background: var(--blush-2); color: var(--rose-deep); }
+.mood-chip:hover { transform: translateY(-1px); border-color: #D9C2B6; }
+.mood-chip[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+.mood-chip[aria-pressed="true"] b { background: rgba(255,255,255,.18); color: #fff; }
+.flower.flower-in { animation: flowerIn .45s var(--spring) both; animation-delay: calc(var(--fi, 0) * 28ms); }
+@keyframes flowerIn { from { opacity: 0; transform: translateY(10px) scale(.94); } }
+
+@media (max-width: 600px) {
+  .size-pick { gap: 6px; }
+  .size-opt { flex-direction: column; text-align: center; gap: 4px; padding: 10px 6px; }
+  .size-opt small { font-size: .68rem; }
+  .size-ico { width: 32px; height: 38px; }
+  .stem-meter { width: 46px; }
+}
