@@ -16,7 +16,9 @@ Petal Post lets you build a bouquet, write a note and send it as a link. When yo
 | Sharing | Get it to the person | Copy link, WhatsApp, email, or the device's share sheet. |
 | Recipient | A moment, not just a message | Envelope opens with a petal burst, the bouquet grows, the note types out and the flower meanings appear. |
 | Recipient | Reply in kind | **Send flowers back** opens the builder with the names swapped. |
-| Recipient | Keep it | **Save keepsake** downloads a 1080×1350 PNG of the bouquet and note. |
+| Recipient | Keep it | **Save keepsake** downloads a 1080×1350 PNG of the bouquet, note and photo. |
+| Sender | Make it personal | **Add a photo** to the note: it's pinned to the card like a polaroid when the envelope opens. |
+| Everyone | Faces on the wall | Optional round photos of sender and recipient next to their names on the public wall. |
 | Everyone | See who's sending flowers | The **public flower wall** shows who sent flowers to whom, how many bouquets and stems, and which flowers, plus live totals. Senders opt in per gift. |
 | Everyone | Privacy | The note, link and surprise date never leave the link's `#hash`. The wall stores only first names, occasion and flower codes, and only when the sender ticks the box. |
 | Everyone | Accessibility | Keyboard-operable, labelled controls, and `prefers-reduced-motion` turns off falling petals and long animations. |
@@ -31,6 +33,15 @@ GitHub Pages can't store data, so the wall uses a free [Supabase](https://supaba
 4. Paste both into [`js/config.js`](js/config.js), then commit and push.
 
 What the database allows: visitors can **add** a gift (first names checked against letters only, max 20 chars, 1–12 stems) and read two summaries, `gift_stats()` for the totals and `gift_wall()` for one row per sender → recipient pair with counts. Raw rows can't be read, edited or deleted from the site. To remove an entry, delete it in Supabase's **Table Editor**.
+
+## Security
+
+- **No HTML injection:** everything people type (names, notes, wall data) is inserted with `textContent`. Gift links are validated field by field (known flower codes, lengths, UUID photo ids).
+- **Content Security Policy:** scripts only from this site; network and images only from Supabase; no plugins, forms or `<base>` tags.
+- **Database:** visitors can only *add* wall entries (specific columns) and read two summaries. Raw rows, the IP salt and anything else are off limits. Names, flower codes and photo ids are validated in Postgres.
+- **Rate limits:** max 5 wall entries per visitor per 10 minutes and 30 per minute overall. Visitors are identified by a salted hash of their IP, so raw IPs are never stored. Photos: 20 per minute and 400 per day overall.
+- **Photos:** re-encoded in the browser, which strips GPS and camera data, and resized (max 1200 px, under 1 MB). The bucket only accepts JPEGs under random UUID names. Visitors can't list, overwrite or delete files.
+- **Known limits:** the note travels inside the link, so the surprise date is a playful lock, not encryption. There's no automatic moderation of names or photos: remove entries in Supabase's Table Editor and photos in Storage. Photo links are unguessable but public to anyone who has them.
 
 ## Motion design
 

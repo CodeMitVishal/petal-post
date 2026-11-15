@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Petal Post — Send flowers that never wilt</title>
   <meta name="description" content="Build a bouquet, write a note and send it as a link. Your person opens an envelope and watches their flowers bloom.">
@@ -13,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=6">
+  <link rel="stylesheet" href="css/styles.css?v=8">
 </head>
 <body>
   <canvas id="petals" aria-hidden="true"></canvas>
@@ -130,6 +132,7 @@
               <p>Your bouquet is waiting for its first flower.</p>
             </div>
             <div class="gift-tag" id="previewTag" aria-hidden="true"><span>To</span> <strong id="tagName">someone special</strong></div>
+            <div class="preview-photo" id="previewPhoto" hidden><img alt="Your photo for the note"></div>
           </div>
           <div class="preview-tools">
             <span id="stemCount" aria-live="polite">0 stems</span>
@@ -196,10 +199,25 @@
                 <button class="chip-btn" id="inspireBtn" type="button">✎ Inspire me</button>
                 <span id="msgCount">0 / 280</span>
               </div>
+              <div class="photo-field" id="giftPhotoField" hidden>
+                <span class="field-label">Add a photo <small>(optional)</small></span>
+                <div class="photo-pick">
+                  <label class="photo-drop" id="giftPhotoDrop">
+                    <input type="file" id="giftPhotoInput" accept="image/*" class="sr-only">
+                    <img id="giftPhotoPreview" alt="Chosen photo" hidden>
+                    <span class="photo-empty"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l2-2h6l2 2h3v12H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>Choose a photo</span>
+                    <span class="photo-busy" hidden><i></i>Uploading…</span>
+                  </label>
+                  <div class="photo-side">
+                    <p class="hint small">They'll see it pinned to your note. Location and camera data are removed. Anyone with the gift link can see the photo.</p>
+                    <button type="button" class="chip-btn subtle" id="giftPhotoRemove" hidden>Remove photo</button>
+                  </div>
+                </div>
+              </div>
               <details class="surprise" id="surpriseBox">
                 <summary>Make it a surprise: choose the day it opens</summary>
                 <label class="field"><span>Opens on</span><input type="date" id="dateInput"></label>
-                <p class="hint small">Until then they'll see a sealed envelope with a countdown. Leave empty to open right away.</p>
+                <p class="hint small">Until then they'll see a sealed envelope with a countdown. Leave empty to open right away. It's a playful lock, not encryption: the note travels inside the link.</p>
               </details>
             </div>
 
@@ -207,13 +225,37 @@
               <h2>Ready to send 💌</h2>
               <p class="hint" id="sendSummary"></p>
               <div class="warn" id="sendWarn" hidden></div>
-              <label class="consent" id="wallConsent" hidden>
-                <input type="checkbox" id="wallOpt">
-                <span>
-                  <strong>Add to the public flower wall</strong>
-                  <small id="wallPreview"></small>
-                </span>
-              </label>
+              <div class="wall-box" id="wallConsent" hidden>
+                <label class="consent" id="wallConsentLabel">
+                  <input type="checkbox" id="wallOpt">
+                  <span>
+                    <strong>Add to the public flower wall</strong>
+                    <small id="wallPreview"></small>
+                  </span>
+                </label>
+                <div class="wall-faces" id="wallFaces" hidden>
+                  <p class="faces-title">Add faces to the wall <small>(optional, public)</small></p>
+                  <div class="faces">
+                    <div class="face" data-who="ps">
+                      <label class="avatar-pick">
+                        <input type="file" accept="image/*" class="sr-only" aria-label="Add your photo to the wall">
+                        <img alt="" hidden><span class="initial" aria-hidden="true">?</span><span class="avatar-busy" hidden></span>
+                      </label>
+                      <span class="face-name">Your photo</span>
+                      <button type="button" class="face-x" hidden aria-label="Remove your photo">Remove</button>
+                    </div>
+                    <div class="face" data-who="pr">
+                      <label class="avatar-pick">
+                        <input type="file" accept="image/*" class="sr-only" aria-label="Add their photo to the wall">
+                        <img alt="" hidden><span class="initial" aria-hidden="true">?</span><span class="avatar-busy" hidden></span>
+                      </label>
+                      <span class="face-name">Their photo</span>
+                      <button type="button" class="face-x" hidden aria-label="Remove their photo">Remove</button>
+                    </div>
+                  </div>
+                  <p class="hint small">Only add their photo if they're happy for it to be public. Photos are cropped to a small circle.</p>
+                </div>
+              </div>
               <div class="link-box" id="linkBox">
                 <label for="linkOut" class="sr-only">Gift link</label>
                 <input id="linkOut" readonly>
@@ -298,6 +340,7 @@
           </div>
           <div class="reveal-side">
             <article class="note-card" id="noteCard">
+              <figure class="note-photo" id="notePhoto" hidden><img id="notePhotoImg" alt="" referrerpolicy="no-referrer"></figure>
               <p class="note-to">Dear <span id="noteTo"></span>,</p>
               <p class="note-msg" id="noteMsg" aria-live="polite"></p>
               <p class="note-from" id="noteFromWrap">— <span id="noteFrom"></span></p>
@@ -322,8 +365,8 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/config.js?v=6"></script>
-  <script src="js/flowers.js?v=6"></script>
-  <script src="js/app.js?v=6"></script>
+  <script src="js/config.js?v=8"></script>
+  <script src="js/flowers.js?v=8"></script>
+  <script src="js/app.js?v=8"></script>
 </body>
 </html>

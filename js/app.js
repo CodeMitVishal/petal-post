@@ -66,6 +66,7 @@
       r: F.RIBBONS[g.r] ? g.r : 'ruby',
       d: /^\d{4}-\d{2}-\d{2}$/.test(g.d || '') ? g.d : '',
       s: Number.isFinite(+g.s) ? Math.abs(+g.s | 0) : 1,
+      p: Photos.valid(g.p) ? g.p : '',
     };
   }
 
@@ -165,8 +166,13 @@
       const url = `${cfg().supabaseUrl.replace(/\/+$/, '')}/rest/v1/${path}`;
       const headers = { apikey: cfg().supabaseAnonKey, 'Content-Type': 'application/json' };
       if (prefer) headers.Prefer = prefer;
-      return fetch(url, { method: 'POST', headers, body: JSON.stringify(body) }).then(r => {
-        if (!r.ok) throw new Error(`wall ${path}: ${r.status}`);
+      return fetch(url, { method: 'POST', headers, body: JSON.stringify(body) }).then(async r => {
+        if (!r.ok) {
+          const err = new Error(`wall ${path}: ${r.status}`);
+          // P0001 = our own friendly messages (rate limits); never show raw database errors.
+          try { const j = await r.json(); if (j && j.code === 'P0001') err.userMessage = String(j.message).slice(0, 120); } catch { /* ignore */ }
+          throw err;
+        }
         return prefer ? null : r.json();
       });
     }
@@ -209,6 +215,30 @@
       });
     }
 
+    // Round avatar (photo, or a coloured initial) followed by the first name.
+    function person(host, name, photoId) {
+      const av = document.createElement('span');
+      av.className = 'av';
+      av.setAttribute('aria-hidden', 'true');
+      const initial = (String(name).match(/\p{L}/u) || ['?'])[0].toUpperCase();
+      let h = 0;
+      for (const ch of String(name).toLowerCase()) h = (h * 31 + ch.codePointAt(0)) % 360;
+      av.style.setProperty('--h', h);
+      av.textContent = initial;
+      const src = Photos.url('a', photoId);
+      if (src) {
+        const img = new Image();
+        img.alt = '';
+        img.decoding = 'async';
+        img.referrerPolicy = 'no-referrer';
+        img.onload = () => { av.textContent = ''; av.appendChild(img); av.classList.add('has-photo'); };
+        img.src = src;
+      }
+      const strong = document.createElement('strong');
+      strong.textContent = name;
+      host.append(av, strong);
+    }
+
     function item(r, fresh) {
       const li = document.createElement('li');
       li.className = 'wall-item' + (fresh ? ' fresh' : '');
@@ -218,10 +248,11 @@
       const occ = OCC[r.occasion];
       li.innerHTML =
         `<div class="wi-flowers" aria-hidden="true">${uniq.map(id => F.headThumb(id)).join('')}</div>` +
-        '<div class="wi-main"><p class="wi-names"><strong class="wi-from"></strong><span class="wi-arrow" aria-label="sent flowers to">→</span><strong class="wi-to"></strong></p><p class="wi-meta"></p></div>' +
+        '<div class="wi-main"><p class="wi-names"><span class="wi-person"></span><span class="wi-arrow" aria-label="sent flowers to">→</span><span class="wi-person"></span></p><p class="wi-meta"></p></div>' +
         `<span class="wi-count"><b>${times}</b>${times === 1 ? 'bouquet' : 'bouquets'}</span>`;
-      li.querySelector('.wi-from').textContent = r.sender;
-      li.querySelector('.wi-to').textContent = r.recipient;
+      const [from, to] = li.querySelectorAll('.wi-person');
+      person(from, r.sender, r.sender_photo);
+      person(to, r.recipient, r.recipient_photo);
       li.querySelector('.wi-meta').textContent = [occ ? `${occ.emoji} ${occ.label}` : '', `${stems} ${stems === 1 ? 'stem' : 'stems'}`, uniq.map(id => F.BY_ID[id].name).join(', '), ago(r.last_at)].filter(Boolean).join(' · ');
       return li;
     }
@@ -291,12 +322,17 @@
       if (done.includes(code)) return;
       const flowers = data.b.split('.').slice(0, MAX);
       try {
-        await api('gifts', { sender: firstName(state.f) || 'Someone', recipient, occasion: OCC[data.o] ? data.o : null, stems: flowers.length, flowers: flowers.join('.') }, 'return=minimal');
+        await api('gifts', {
+          sender: firstName(state.f) || 'Someone', recipient,
+          occasion: OCC[data.o] ? data.o : null, stems: flowers.length, flowers: flowers.join('.'),
+          sender_photo: Photos.valid(state.ps) ? state.ps : null,
+          recipient_photo: Photos.valid(state.pr) ? state.pr : null,
+        }, 'return=minimal');
         store.set('petalpost.walled', [...done, code].slice(-50));
         toast(`Added to the flower wall: ${firstName(state.f) || 'Someone'} → ${recipient} 🌸`);
       } catch (e) {
         console.warn(e);
-        toast("Your link is ready, but the flower wall couldn't be updated.");
+        toast(e.userMessage ? `Your link is ready. ${e.userMessage}` : "Your link is ready, but the flower wall couldn't be updated.");
       }
     }
 
@@ -306,6 +342,76 @@
     }
 
     return { on, show, record, firstName, init };
+  })();
+
+  /* ================= PHOTOS ================= */
+  // Photos are re-drawn on a canvas and saved as fresh JPEGs, which drops EXIF data
+  // (GPS location, camera, date). Stored under random UUID names in the "photos" bucket.
+  const Photos = (() => {
+    const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+    const valid = id => typeof id === 'string' && UUID.test(id);
+    const base = () => String((window.PETAL_CONFIG || {}).supabaseUrl || '').replace(/\/+$/, '');
+    const url = (kind, id) => (Wall.on() && valid(id) && (kind === 'g' || kind === 'a') ? `${base()}/storage/v1/object/public/photos/${kind}/${id}.jpg` : '');
+    const PRESETS = { g: { max: 1200, square: false, quality: 0.84 }, a: { max: 256, square: true, quality: 0.85 } };
+
+    async function decode(file) {
+      if ('createImageBitmap' in window) {
+        try { const b = await createImageBitmap(file, { imageOrientation: 'from-image' }); return { src: b, w: b.width, h: b.height, done: () => b.close && b.close() }; } catch { /* fall back */ }
+      }
+      const u = URL.createObjectURL(file);
+      const img = new Image();
+      img.src = u;
+      try { await img.decode(); } catch (e) { URL.revokeObjectURL(u); throw e; }
+      return { src: img, w: img.naturalWidth, h: img.naturalHeight, done: () => URL.revokeObjectURL(u) };
+    }
+
+    async function toJpeg(file, { max, square, quality }) {
+      const im = await decode(file);
+      try {
+        let sx = 0, sy = 0, sw = im.w, sh = im.h;
+        if (!sw || !sh) throw new Error('empty image');
+        if (square) { const s = Math.min(sw, sh); sx = (sw - s) / 2; sy = (sh - s) / 2; sw = sh = s; }
+        let scale = Math.min(1, max / Math.max(sw, sh)), q = quality;
+        for (let attempt = 0; attempt < 4; attempt++) {
+          const c = document.createElement('canvas');
+          c.width = Math.max(1, Math.round(sw * scale));
+          c.height = Math.max(1, Math.round(sh * scale));
+          const x = c.getContext('2d');
+          x.fillStyle = '#fff';
+          x.fillRect(0, 0, c.width, c.height);
+          x.drawImage(im.src, sx, sy, sw, sh, 0, 0, c.width, c.height);
+          const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', q));
+          if (blob && blob.size <= 950 * 1024) return blob;
+          scale *= 0.8; q -= 0.08;
+        }
+        throw new Error('too large');
+      } finally { im.done(); }
+    }
+
+    async function upload(file, kind) {
+      if (!Wall.on()) throw new Error('storage off');
+      if (!file || !/^image\//.test(file.type || '') ) throw Object.assign(new Error('type'), { userMessage: 'Please choose a photo (JPG, PNG, WebP or GIF).' });
+      if (file.size > 25 * 1024 * 1024) throw Object.assign(new Error('size'), { userMessage: 'That photo is too large. Please pick one under 25 MB.' });
+      let blob;
+      try { blob = await toJpeg(file, PRESETS[kind]); } catch (e) {
+        throw Object.assign(e, { userMessage: "Couldn't read that photo. Try a JPG or PNG." });
+      }
+      const id = crypto.randomUUID();
+      const cfg = window.PETAL_CONFIG;
+      const r = await fetch(`${base()}/storage/v1/object/photos/${kind}/${id}.jpg`, {
+        method: 'POST',
+        headers: { apikey: cfg.supabaseAnonKey, 'Content-Type': 'image/jpeg', 'x-upsert': 'false', 'cache-control': '31536000' },
+        body: blob,
+      });
+      if (!r.ok) {
+        throw Object.assign(new Error(`upload ${r.status}`), {
+          userMessage: r.status === 403 || r.status === 429 ? 'Lots of photos are being shared right now. Please try again in a minute.' : "The photo couldn't be uploaded. Please try again.",
+        });
+      }
+      return { id, preview: URL.createObjectURL(blob) };
+    }
+
+    return { valid, url, upload };
   })();
 
   /* ================= HOME ================= */
@@ -377,7 +483,8 @@
   /* ================= BUILDER ================= */
   let uidN = 0;
   const newItem = (id, k = Math.random()) => ({ uid: `u${++uidN}`, id, k });
-  const blankState = () => ({ o: '', items: [], w: 'kraft', r: 'ruby', t: '', f: '', m: '', mAuto: false, d: '', s: randSeed(), step: 0, touched: false, noteIdx: 0, wall: false });
+  const blankState = () => ({ o: '', items: [], w: 'kraft', r: 'ruby', t: '', f: '', m: '', mAuto: false, d: '', s: randSeed(), step: 0, touched: false, noteIdx: 0, wall: false, p: '', ps: '', pr: '' });
+  const previews = {}; // local blob previews for photos picked in this session
   let state = restore();
 
   function restore() {
@@ -386,14 +493,15 @@
     if (!d || typeof d !== 'object') return s;
     Object.assign(s, sanitize({ ...d, b: (d.items || []).map(i => i.id).join('.') }));
     s.items = (d.items || []).filter(i => F.BY_ID[i.id]).slice(0, MAX).map(i => newItem(i.id, +i.k || Math.random()));
-    s.mAuto = !!d.mAuto; s.touched = !!d.touched; s.wall = !!d.wall; s.step = Math.min(4, Math.max(0, d.step | 0));
+    s.mAuto = !!d.mAuto; s.touched = !!d.touched; s.wall = !!d.wall;
+    s.ps = Photos.valid(d.ps) ? d.ps : ''; s.pr = Photos.valid(d.pr) ? d.pr : ''; s.step = Math.min(4, Math.max(0, d.step | 0));
     return s;
   }
   function save() {
     store.set('petalpost.draft', { ...state, items: state.items.map(({ id, k }) => ({ id, k })) });
   }
   const ordered = () => [...state.items].sort((a, b) => a.k - b.k);
-  const giftData = () => ({ v: 1, t: state.t, f: state.f, m: state.m, o: state.o, b: ordered().map(i => i.id).join('.'), w: state.w, r: state.r, d: state.d, s: state.s });
+  const giftData = () => ({ v: 1, t: state.t, f: state.f, m: state.m, o: state.o, b: ordered().map(i => i.id).join('.'), w: state.w, r: state.r, d: state.d, s: state.s, ...(Photos.valid(state.p) ? { p: state.p } : {}) });
   const giftUrl = () => `${location.origin}${location.pathname}#/g/${encode(giftData())}`;
 
   function applyOccasion(id, force) {
@@ -513,7 +621,32 @@
       nb.hidden = false;
       nb.addEventListener('click', () => navigator.share({ title: 'Flowers for you 💐', text: shareText(false), url: giftUrl() }).then(shared).catch(() => {}));
     }
-    $('#wallOpt').addEventListener('change', e => { state.wall = e.target.checked; save(); });
+    $('#wallOpt').addEventListener('change', e => { state.wall = e.target.checked; renderSend(); save(); });
+
+    // photos: one for the note (kind "g"), optional faces for the wall (kind "a")
+    const pickPhoto = async (file, kind, key, busyEl) => {
+      if (!file) return;
+      busyEl.hidden = false;
+      try {
+        const { id, preview } = await Photos.upload(file, kind);
+        state[key] = id;
+        previews[id] = preview;
+        save();
+        renderPhotos();
+        renderSend();
+        if (kind === 'g') toast('Photo added to your note 📷');
+      } catch (e) {
+        console.warn(e);
+        toast(e.userMessage || "The photo couldn't be added. Please try again.");
+      } finally { busyEl.hidden = true; }
+    };
+    $('#giftPhotoInput').addEventListener('change', e => { pickPhoto(e.target.files[0], 'g', 'p', $('#giftPhotoDrop .photo-busy')); e.target.value = ''; });
+    $('#giftPhotoRemove').addEventListener('click', () => { state.p = ''; save(); renderPhotos(); renderSend(); });
+    $$('#wallFaces .face').forEach(face => {
+      const key = face.dataset.who;
+      face.querySelector('input').addEventListener('change', e => { pickPhoto(e.target.files[0], 'a', key, face.querySelector('.avatar-busy')); e.target.value = ''; });
+      face.querySelector('.face-x').addEventListener('click', () => { state[key] = ''; save(); renderPhotos(); });
+    });
     $('#previewBtn').addEventListener('click', () => {
       if (!state.items.length) return;
       sess.set('pp.preview', '1');
@@ -668,10 +801,15 @@
       const to = Wall.firstName(state.t), from = Wall.firstName(state.f) || 'Someone';
       opt.checked = state.wall;
       opt.disabled = !to;
-      consent.classList.toggle('off', !to);
+      $('#wallConsentLabel').classList.toggle('off', !to);
       $('#wallPreview').textContent = to
         ? `Shows “${from} → ${to}”, the occasion and the flowers. First names only. Your note stays private.`
         : 'Add their name in the Note step to join the wall.';
+      $('#wallFaces').hidden = !(state.wall && to);
+      const initials = { ps: from, pr: to };
+      $$('#wallFaces .face').forEach(face => {
+        face.querySelector('.initial').textContent = ((initials[face.dataset.who] || '?').match(/\p{L}/u) || ['?'])[0].toUpperCase();
+      });
     }
     $('#waBtn').href = 'https://wa.me/?text=' + encodeURIComponent(shareText());
     $('#mailBtn').href = `mailto:?subject=${encodeURIComponent('I sent you flowers 💐')}&body=${encodeURIComponent(shareText())}`;
@@ -697,8 +835,30 @@
     next.textContent = ['Choose flowers', 'Wrap it up', 'Write a note', 'Get my link'][n] || 'Next';
   }
 
+  function renderPhotos() {
+    const on = Wall.on();
+    $('#giftPhotoField').hidden = !on;
+    const src = id => previews[id] || Photos.url(id === state.p ? 'g' : 'a', id);
+    const gImg = $('#giftPhotoPreview'), has = on && Photos.valid(state.p);
+    gImg.hidden = !has;
+    if (has && gImg.getAttribute('src') !== src(state.p)) gImg.src = src(state.p);
+    $('#giftPhotoDrop').classList.toggle('has', has);
+    $('#giftPhotoRemove').hidden = !has;
+    const pv = $('#previewPhoto');
+    pv.hidden = !has;
+    if (has) { const im = pv.querySelector('img'); if (im.getAttribute('src') !== src(state.p)) im.src = src(state.p); }
+    $$('#wallFaces .face').forEach(face => {
+      const id = state[face.dataset.who], img = face.querySelector('img'), ok = on && Photos.valid(id);
+      img.hidden = !ok;
+      if (ok && img.getAttribute('src') !== src(id)) img.src = src(id);
+      face.querySelector('.initial').hidden = ok;
+      face.querySelector('.face-x').hidden = !ok;
+      face.classList.toggle('has', ok);
+    });
+  }
+
   function renderAll() {
-    renderPreview(); renderCatalog(); renderSwatches(); renderTag(false); renderFields(); renderSend(); renderSteps(false);
+    renderPreview(); renderCatalog(); renderSwatches(); renderTag(false); renderFields(); renderPhotos(); renderSend(); renderSteps(false);
     save();
   }
 
@@ -784,6 +944,16 @@
 
     $('#noteTo').textContent = gift.t || 'you';
     $('#noteFrom').textContent = gift.f || 'someone who cares';
+    const fig = $('#notePhoto'), pimg = $('#notePhotoImg'), psrc = Photos.url('g', gift.p);
+    fig.hidden = true;
+    fig.classList.remove('pinned');
+    if (psrc) {
+      pimg.alt = `Photo from ${gift.f || 'the sender'}`;
+      const show = () => { fig.hidden = false; void fig.offsetWidth; fig.classList.add('pinned'); };
+      pimg.onload = show;
+      pimg.onerror = () => { fig.hidden = true; };
+      if (pimg.src === psrc && pimg.complete && pimg.naturalWidth) show(); else pimg.src = psrc;
+    }
     const from = $('#noteFromWrap');
     from.classList.remove('show');
     const msgEl = $('#noteMsg');
@@ -842,6 +1012,28 @@
       halo.addColorStop(0, 'rgba(255,248,236,.95)'); halo.addColorStop(1, 'rgba(255,248,236,0)');
       x.fillStyle = halo; x.fillRect(0, 0, W, 800);
       x.drawImage(img, 240, 30, 600, 720);
+      // the sender's photo as a tilted polaroid (needs CORS, which Supabase public storage allows)
+      const psrc = Photos.url('g', gift.p);
+      if (psrc) {
+        try {
+          const ph = new Image();
+          ph.crossOrigin = 'anonymous';
+          ph.referrerPolicy = 'no-referrer';
+          ph.src = psrc;
+          await ph.decode();
+          const S = 250, pad = 14;
+          const s = Math.min(ph.naturalWidth, ph.naturalHeight);
+          x.save();
+          x.translate(70 + (S + pad * 2) / 2, 470 + (S + pad * 2 + 40) / 2);
+          x.rotate(-0.12);
+          x.shadowColor = 'rgba(80,30,40,.25)'; x.shadowBlur = 24; x.shadowOffsetY = 10;
+          x.fillStyle = '#fff';
+          x.fillRect(-(S / 2 + pad), -(S / 2 + pad + 20), S + pad * 2, S + pad * 2 + 40);
+          x.shadowColor = 'transparent';
+          x.drawImage(ph, (ph.naturalWidth - s) / 2, (ph.naturalHeight - s) / 2, s, s, -S / 2, -S / 2 - 20, S, S);
+          x.restore();
+        } catch (e) { console.warn('keepsake photo skipped', e); }
+      }
       // card
       x.fillStyle = '#FFFDF9';
       x.shadowColor = 'rgba(110,40,55,.18)'; x.shadowBlur = 40; x.shadowOffsetY = 14;
