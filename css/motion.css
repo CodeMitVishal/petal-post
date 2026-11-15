@@ -1,0 +1,118 @@
+/* =========================================================
+   Petal Post — motion layer styles (paired with js/motion.js)
+   ========================================================= */
+.fx-layer { position: fixed; inset: 0; pointer-events: none; z-index: 60; overflow: hidden; }
+
+/* ambient aurora */
+.aurora { position: fixed; inset: -20vmax; z-index: 0; pointer-events: none; overflow: hidden; }
+.aurora i { position: absolute; width: 60vmax; height: 60vmax; border-radius: 50%; opacity: .55; will-change: transform; }
+.aurora i:nth-child(1) { left: 0; top: 5%; background: radial-gradient(circle, rgba(250,196,206,.55) 0%, rgba(250,196,206,0) 62%); animation: drift1 38s ease-in-out infinite alternate; }
+.aurora i:nth-child(2) { right: 0; top: 30%; background: radial-gradient(circle, rgba(255,226,176,.5) 0%, rgba(255,226,176,0) 62%); animation: drift2 46s ease-in-out infinite alternate; }
+.aurora i:nth-child(3) { left: 30%; bottom: 0; background: radial-gradient(circle, rgba(203,221,190,.45) 0%, rgba(203,221,190,0) 62%); animation: drift3 52s ease-in-out infinite alternate; }
+@keyframes drift1 { to { transform: translate(18vmax, 12vmax) scale(1.15); } }
+@keyframes drift2 { to { transform: translate(-22vmax, -10vmax) scale(.9); } }
+@keyframes drift3 { to { transform: translate(-10vmax, -18vmax) scale(1.2); } }
+
+/* scroll progress */
+.scroll-progress { position: fixed; left: 0; right: 0; top: 0; height: 3px; z-index: 30; transform-origin: 0 50%; transform: scaleX(0); background: linear-gradient(90deg, var(--rose), #F7A6B4, var(--gold)); pointer-events: none; }
+
+/* hero parallax + floating blooms */
+.hero-art, .hero-copy { will-change: translate; }
+.hero-art { position: relative; }
+.hero-float { position: absolute; width: 54px; height: 54px; z-index: 2; pointer-events: none; transition: translate .6s var(--ease); animation: heroFloat calc(5s + var(--k) * 1.3s) ease-in-out calc(var(--k) * -1.1s) infinite; filter: drop-shadow(0 8px 10px rgba(120,40,60,.18)); }
+.hero-float svg { width: 100%; height: 100%; }
+@keyframes heroFloat { 0%, 100% { transform: translateY(0) rotate(-8deg); } 50% { transform: translateY(-16px) rotate(10deg); } }
+
+/* headings rise word by word */
+.split .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .12em; margin-bottom: -.12em; }
+.split .wi { display: inline-block; transform: translateY(105%) rotate(4deg); transition: transform .9s var(--ease); transition-delay: calc(var(--wi) * 70ms + .1s); }
+.in .split .wi, .split.in .wi { transform: none; }
+
+/* cursor petals */
+.trail-petal { position: fixed; width: 9px; height: 13px; margin: -6px 0 0 -4px; border-radius: 80% 0 80% 0; opacity: .85; animation: trailFall 1s ease-out forwards; }
+@keyframes trailFall { 0% { transform: scale(.4) rotate(0); opacity: .9; } 100% { transform: translate(var(--dx), 46px) scale(1) rotate(var(--rot)); opacity: 0; } }
+
+/* press ripples */
+.rp-host { overflow: hidden; isolation: isolate; }
+.ripple { position: absolute; border-radius: 50%; pointer-events: none; z-index: 0; background: radial-gradient(circle, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 60%); transform: scale(0); animation: ripple .7s var(--ease) forwards; }
+.btn-ghost .ripple, .chip-btn .ripple, .share .ripple, .occasion .ripple, .flower .ripple, .nav-link .ripple, .stat .ripple, .wall-item .ripple { background: radial-gradient(circle, rgba(214,69,93,.22) 0%, rgba(214,69,93,0) 60%); }
+@keyframes ripple { to { transform: scale(1); opacity: 0; } }
+
+/* magnetic buttons + 3D tilt cards (individual translate/rotate so they combine with hover transforms) */
+.btn-primary, .seal { transition: transform .25s var(--spring), box-shadow .25s ease, background .2s, translate .35s var(--spring); }
+.occasion-grid, .how, .features, .stats, .catalog, .wall-list { perspective: 900px; }
+.occasion, .how li, .features article, .stat, .flower, .wall-item { transition: transform .3s var(--spring), box-shadow .3s ease, border-color .2s, background .2s, rotate .4s var(--ease); }
+.tilting { transition: transform .3s var(--spring), box-shadow .3s ease, border-color .2s, background .2s, rotate .08s linear; }
+.how li, .features article, .stat { position: relative; overflow: hidden; }
+.occasion::before, .how li::before, .features article::before, .stat::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .3s; z-index: 1;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(255,255,255,.7), rgba(255,255,255,0) 55%);
+}
+.tilting::before { opacity: 1; }
+
+/* envelope: tilt + drifting hearts */
+.envelope { transition: rotate .4s var(--ease); }
+.envelope-stage { position: relative; }
+.env-hearts { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+.env-hearts span { position: absolute; bottom: -30px; width: 22px; height: 22px; scale: var(--s); opacity: 0; animation: heartRise var(--t) linear var(--delay) infinite; }
+.env-hearts span svg { width: 100%; height: 100%; }
+@keyframes heartRise { 0% { transform: translateY(0) rotate(-10deg); opacity: 0; } 10% { opacity: .7; } 50% { transform: translateY(-45vh) translateX(18px) rotate(10deg); } 90% { opacity: .5; } 100% { transform: translateY(-90vh) translateX(-10px) rotate(-6deg); opacity: 0; } }
+.envelope-stage > .env-kicker, .envelope-stage > .env-hint, .envelope-stage > .countdown { position: relative; z-index: 1; }
+.envelope-stage > .envelope { z-index: 1; }
+
+/* flying flower */
+.fly-clone { position: fixed; z-index: 61; pointer-events: none; filter: drop-shadow(0 10px 12px rgba(120,40,60,.25)); }
+.spark { position: fixed; color: var(--gold); font-size: 14px; margin: -8px 0 0 -6px; animation: spark .7s var(--ease) forwards; }
+@keyframes spark { 0% { transform: rotate(var(--a)) translateY(0) scale(.4); opacity: 1; } 100% { transform: rotate(var(--a)) translateY(-34px) scale(1); opacity: 0; } }
+
+/* wrap colour wave */
+.color-wave { position: absolute; left: 50%; top: 62%; width: 140%; aspect-ratio: 1; margin-left: -70%; margin-top: -70%; border-radius: 50%; pointer-events: none; z-index: 0; opacity: .55; transform: scale(0); animation: wave .9s var(--ease) forwards; }
+.preview-card > svg { position: relative; z-index: 1; }
+@keyframes wave { 60% { opacity: .4; } to { transform: scale(1); opacity: 0; } }
+
+/* floating hearts */
+.float-heart { position: fixed; width: 22px; height: 22px; margin: -11px 0 0 -11px; animation: floatHeart 1.8s var(--ease) forwards; }
+.float-heart.small { width: 14px; height: 14px; margin: -7px 0 0 -7px; animation-duration: 1.3s; }
+.float-heart.tiny { width: 11px; height: 11px; margin: -5px 0 0 -5px; animation-duration: .9s; }
+.float-heart svg { width: 100%; height: 100%; }
+@keyframes floatHeart { 0% { transform: scale(.3); opacity: 0; } 15% { opacity: 1; transform: scale(1.1); } 100% { transform: translate(var(--dx), -110px) scale(.8) rotate(12deg); opacity: 0; } }
+
+/* flying envelope */
+.fly-env { position: fixed; width: 46px; height: 32px; border-radius: 5px; background: linear-gradient(160deg, #F7DBD3, #EFC6BC); box-shadow: 0 10px 22px -8px rgba(150,40,60,.45); }
+.fly-env::before { content: ''; position: absolute; inset: 0 0 40% 0; background: #E8B6AB; clip-path: polygon(0 0, 100% 0, 50% 100%); border-radius: 5px 5px 0 0; }
+.fly-env i { position: absolute; left: 50%; top: 52%; width: 12px; height: 12px; margin: -6px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #EE6A7F, #B8304A 70%); }
+
+/* reveal: butterflies + twinkles */
+.reveal-art { position: relative; }
+.butterfly { position: absolute; left: 0; top: 0; width: 54px; height: 44px; margin: -22px 0 0 -27px; z-index: 3; pointer-events: none; will-change: transform; filter: drop-shadow(0 6px 6px rgba(80,30,40,.2)); animation: bfIn 1s var(--ease) both; }
+.butterfly svg { width: 100%; height: 100%; overflow: visible; }
+.butterfly .wing { transform-box: fill-box; animation: flap var(--flap, .2s) ease-in-out infinite alternate; }
+.butterfly .wing.l { transform-origin: 100% 50%; }
+.butterfly .wing.r { transform-origin: 0% 50%; }
+@keyframes flap { from { transform: scaleX(1); } to { transform: scaleX(.18); } }
+@keyframes bfIn { from { opacity: 0; } }
+.twinkle { position: absolute; color: #F4B63F; pointer-events: none; z-index: 2; opacity: 0; text-shadow: 0 0 8px rgba(255,214,120,.9); animation: twinkle var(--t) ease-in-out var(--delay) infinite; }
+@keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(.3) rotate(0); } 50% { opacity: 1; transform: scale(1) rotate(90deg); } }
+
+/* small extras */
+.stepper button[aria-current="step"] i { box-shadow: 0 0 0 0 rgba(214,69,93,.45); animation: stepPulse 2s ease-out infinite; }
+@keyframes stepPulse { 70% { box-shadow: 0 0 0 10px rgba(214,69,93,0); } 100% { box-shadow: 0 0 0 0 rgba(214,69,93,0); } }
+.brand span { background: linear-gradient(90deg, var(--ink) 0%, var(--ink) 40%, var(--rose) 50%, var(--ink) 60%, var(--ink) 100%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 7s ease-in-out infinite; }
+@keyframes shimmer { 0%, 70% { background-position: 100% 0; } 100% { background-position: -150% 0; } }
+.wi-count b { transition: transform .4s var(--spring); }
+.wall-item:hover .wi-count b { transform: scale(1.18); }
+.final-cta { position: relative; overflow: hidden; }
+.final-cta::before, .final-cta::after { content: '\273F'; position: absolute; font-size: 120px; line-height: 1; color: rgba(214,69,93,.08); animation: spinSlow 30s linear infinite; pointer-events: none; }
+.final-cta::before { left: -20px; top: -40px; }
+.final-cta::after { right: -10px; bottom: -50px; animation-direction: reverse; }
+@keyframes spinSlow { to { transform: rotate(360deg); } }
+
+@media (max-width: 600px) {
+  .hero-float { width: 40px; height: 40px; }
+  .aurora i { opacity: .4; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aurora, .scroll-progress, .hero-float, .env-hearts, .butterfly, .twinkle, .fx-layer { display: none !important; }
+  .split .wi { transform: none !important; }
+  .brand span { color: var(--ink); background: none; }
+}

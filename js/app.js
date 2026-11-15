@@ -7,6 +7,7 @@
   const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sleep = ms => new Promise(r => setTimeout(r, reduced() ? 0 : ms));
   const MAX = 12;
+  const emit = (name, detail = {}) => document.dispatchEvent(new CustomEvent('pp:' + name, { detail }));
 
   /* ================= data ================= */
   const OCCASIONS = [
@@ -553,6 +554,7 @@
         state.items.push(newItem(f.id));
         state.touched = true;
         card.classList.remove('pulse'); void card.offsetWidth; card.classList.add('pulse');
+        emit('flower-added', { from: card });
         renderAll();
       };
       card.addEventListener('click', e => { if (!e.target.closest('.minus')) add(); });
@@ -583,7 +585,7 @@
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'swatch'; b.dataset.id = id;
       b.innerHTML = `<i style="background:linear-gradient(135deg, ${c.base} 55%, ${c.dark})"></i><span>${c.name}</span>`;
-      b.addEventListener('click', () => { state[key] = id; renderAll(); });
+      b.addEventListener('click', () => { const changed = state[key] !== id; state[key] = id; renderAll(); if (changed) emit('wrap-changed', { color: c.base, from: b }); });
       host.appendChild(b);
     });
     mk($('#wrapSwatches'), F.WRAPS, 'w');
@@ -593,7 +595,7 @@
     const to = $('#toInput'), from = $('#fromInput'), msg = $('#msgInput'), date = $('#dateInput');
     to.addEventListener('input', () => { state.t = to.value; renderTag(true); renderSend(); save(); });
     from.addEventListener('input', () => { state.f = from.value; renderSend(); save(); });
-    msg.addEventListener('input', () => { state.m = msg.value; state.mAuto = false; renderCount(); renderSend(); save(); });
+    msg.addEventListener('input', () => { emit('typing', { field: msg }); state.m = msg.value; state.mAuto = false; renderCount(); renderSend(); save(); });
     date.min = todayStr();
     date.addEventListener('change', () => { state.d = date.value && date.value > todayStr() ? date.value : ''; if (date.value && !state.d) date.value = ''; renderSend(); save(); });
     $('#inspireBtn').addEventListener('click', () => {
@@ -612,14 +614,14 @@
     $('#nextBtn').addEventListener('click', () => goStep(Math.min(4, state.step + 1)));
 
     // share
-    const shared = () => { const data = giftData(); Wall.record(data, encode(data)); };
+    const shared = e => { const data = giftData(); Wall.record(data, encode(data)); emit('shared', { from: e && e.currentTarget }); };
     $('#copyBtn').addEventListener('click', copyLink);
     $('#waBtn').addEventListener('click', shared);
     $('#mailBtn').addEventListener('click', shared);
     if (navigator.share) {
       const nb = $('#nativeShareBtn');
       nb.hidden = false;
-      nb.addEventListener('click', () => navigator.share({ title: 'Flowers for you 💐', text: shareText(false), url: giftUrl() }).then(shared).catch(() => {}));
+      nb.addEventListener('click', () => navigator.share({ title: 'Flowers for you 💐', text: shareText(false), url: giftUrl() }).then(() => shared({ currentTarget: nb })).catch(() => {}));
     }
     $('#wallOpt').addEventListener('change', e => { state.wall = e.target.checked; renderSend(); save(); });
 
@@ -682,6 +684,7 @@
       const data = giftData();
       Wall.record(data, encode(data));
       burstFrom(b, 18);
+      emit('shared', { from: b });
       setTimeout(() => { b.classList.remove('copied'); b.firstElementChild.textContent = 'Copy link'; }, 1800);
     } else toast('Copy failed. Select the link and copy it manually.');
   }
@@ -835,8 +838,19 @@
     next.textContent = ['Choose flowers', 'Wrap it up', 'Write a note', 'Get my link'][n] || 'Next';
   }
 
+  // A photo that can't be loaded (e.g. removed by the site owner) is dropped quietly.
+  function forgetPhoto(key) {
+    if (!state[key]) return;
+    state[key] = '';
+    save();
+    renderPhotos();
+  }
+
   function renderPhotos() {
     const on = Wall.on();
+    $('#giftPhotoPreview').onerror = () => forgetPhoto('p');
+    $('#previewPhoto img').onerror = () => forgetPhoto('p');
+    $$('#wallFaces .face').forEach(face => { face.querySelector('img').onerror = () => forgetPhoto(face.dataset.who); });
     $('#giftPhotoField').hidden = !on;
     const src = id => previews[id] || Photos.url(id === state.p ? 'g' : 'a', id);
     const gImg = $('#giftPhotoPreview'), has = on && Photos.valid(state.p);
@@ -972,6 +986,7 @@
       ml.appendChild(el);
     });
 
+    setTimeout(() => { if (my === typeToken) emit('bloomed', { art: $('.reveal-art') }); }, Math.min(growTime, 2.6) * 1000);
     await sleep(Math.min(growTime, 2.2) * 1000 + 600);
     if (my !== typeToken) return;
     const text = gift.m || 'Thinking of you. 💐';
@@ -989,6 +1004,7 @@
     await sleep(400);
     if (my !== typeToken) return;
     side.classList.add('done');
+    emit('note-done', { card: $('#noteCard') });
     Petals.burst(innerWidth / 2, innerHeight * 0.35, 30);
   }
 
@@ -1096,6 +1112,7 @@
   function route() {
     const h = location.hash || '#/';
     const run = () => {
+      emit('view', { name: h.startsWith('#/g/') ? 'gift' : h.startsWith('#/wall') ? 'wall' : h.startsWith('#/create') ? 'create' : 'home' });
       if (h.startsWith('#/g/')) {
         Wall.show(null);
         swapView('view-gift');
@@ -1122,7 +1139,11 @@
         Wall.show('home');
       }
     };
-    if (document.startViewTransition && !reduced() && route.ready) document.startViewTransition(run);
+    if (document.startViewTransition && !reduced() && route.ready && !document.hidden) {
+      const vt = document.startViewTransition(run);
+      // A transition can be skipped (tab hidden, rapid clicks); the view still switches.
+      [vt.ready, vt.finished, vt.updateCallbackDone].forEach(pr => pr && pr.catch(() => {}));
+    }
     else run();
     route.ready = true;
   }
