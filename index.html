@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Petal Post — Send flowers that never wilt</title>
+  <meta name="description" content="Build a bouquet, write a note and send it as a link. Your person opens an envelope and watches their flowers bloom.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Someone sent you flowers 💐">
+  <meta property="og:description" content="Open your Petal Post bouquet — it blooms right on your screen.">
+  <meta name="theme-color" content="#FBF5EE">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-32 -32 64 64'%3E%3Cg fill='%23E0455F'%3E%3Ccircle r='12' cy='-14'/%3E%3Ccircle r='12' cy='-14' transform='rotate(72)'/%3E%3Ccircle r='12' cy='-14' transform='rotate(144)'/%3E%3Ccircle r='12' cy='-14' transform='rotate(216)'/%3E%3Ccircle r='12' cy='-14' transform='rotate(288)'/%3E%3C/g%3E%3Ccircle r='8' fill='%23F4B63F'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=3">
+</head>
+<body>
+  <canvas id="petals" aria-hidden="true"></canvas>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="topbar">
+    <a href="#/" class="brand" aria-label="Petal Post home">
+      <svg viewBox="-32 -32 64 64" aria-hidden="true"><g fill="#E0455F"><circle r="12" cy="-14"/><circle r="12" cy="-14" transform="rotate(72)"/><circle r="12" cy="-14" transform="rotate(144)"/><circle r="12" cy="-14" transform="rotate(216)"/><circle r="12" cy="-14" transform="rotate(288)"/></g><circle r="8" fill="#F4B63F"/></svg>
+      <span>Petal Post</span>
+    </a>
+    <a href="#/create" class="btn btn-small" data-new>Send flowers</a>
+  </header>
+
+  <main id="main">
+    <!-- ================= HOME ================= -->
+    <section class="view" id="view-home" aria-label="Home">
+      <div class="hero wrap">
+        <div class="hero-copy">
+          <p class="eyebrow" data-reveal>Digital bouquets, delivered by link</p>
+          <h1 data-reveal>Send flowers that <em>never wilt.</em></h1>
+          <p class="lede" data-reveal>Pick the blooms, wrap them up and write a note. Then share one link. Your person opens an envelope and watches their bouquet grow, stem by stem.</p>
+          <div class="cta-row" data-reveal>
+            <a href="#/create" class="btn btn-primary" data-new>
+              Create a bouquet
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <button class="btn btn-ghost" id="sampleBtn" type="button">Open a sample gift</button>
+          </div>
+          <ul class="trust" data-reveal>
+            <li>Free</li><li>No sign-up</li><li>Nothing stored on a server</li>
+          </ul>
+        </div>
+        <div class="hero-art" data-reveal>
+          <div class="arch" id="heroCard">
+            <div class="sun" aria-hidden="true"></div>
+            <svg id="heroSvg" class="bouquet" viewBox="20 50 360 430" role="img" aria-label="An animated bouquet of roses, tulips, daisies and lavender"></svg>
+            <div class="floating-tag" aria-hidden="true"><span>To</span> you ♡</div>
+          </div>
+          <button class="chip-btn" id="heroReplay" type="button" aria-label="Grow a new bouquet">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v4h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Grow another
+          </button>
+        </div>
+      </div>
+
+      <section class="wrap block" aria-labelledby="occ-h">
+        <div class="block-head" data-reveal>
+          <h2 id="occ-h">What are you celebrating?</h2>
+          <p>Start from an occasion. You get a suggested bouquet and a note, and you can change both.</p>
+        </div>
+        <div class="occasion-grid" id="homeOccasions"></div>
+      </section>
+
+      <section class="wrap block" aria-labelledby="how-h">
+        <div class="block-head" data-reveal>
+          <h2 id="how-h">How it works</h2>
+        </div>
+        <ol class="how">
+          <li data-reveal><span class="num">1</span><h3>Build your bouquet</h3><p>Choose up to 12 stems. Each flower shows what it means, so your bouquet says what you mean too.</p></li>
+          <li data-reveal><span class="num">2</span><h3>Write from the heart</h3><p>Add their name and a short note. Stuck? Tap “Inspire me”. You can also set a date so it opens on the day.</p></li>
+          <li data-reveal><span class="num">3</span><h3>Share one link</h3><p>Send it on WhatsApp, by email or anywhere else. They open the envelope and the flowers grow on their screen.</p></li>
+        </ol>
+      </section>
+
+      <section class="block meanings-block" aria-labelledby="lang-h">
+        <div class="wrap block-head" data-reveal>
+          <h2 id="lang-h">The language of flowers</h2>
+          <p>Every stem carries a meaning.</p>
+        </div>
+        <div class="marquee" aria-hidden="true"><div class="marquee-track" id="marquee"></div></div>
+      </section>
+
+      <section class="wrap block" aria-labelledby="touch-h">
+        <div class="block-head" data-reveal><h2 id="touch-h">Little touches</h2></div>
+        <div class="features">
+          <article data-reveal><h3>Surprise date</h3><p>Send it today and choose the day it opens. Until then they see a sealed envelope with a countdown.</p></article>
+          <article data-reveal><h3>Send one back</h3><p>Recipients can answer with a bouquet of their own in one tap, with the names already filled in.</p></article>
+          <article data-reveal><h3>Keepsake image</h3><p>Save the bouquet and note as an image to keep, print or post.</p></article>
+          <article data-reveal><h3>Private by design</h3><p>Your bouquet and note live only inside the link. We don't use a database, accounts or tracking.</p></article>
+        </div>
+      </section>
+
+      <section class="wrap final-cta" data-reveal>
+        <h2>Someone is waiting for flowers.</h2>
+        <a href="#/create" class="btn btn-primary" data-new>Start a bouquet</a>
+      </section>
+
+      <footer class="foot wrap">
+        <p>Made with petals and patience · <a href="https://github.com/VishalCodingNinja/petal-post">Source on GitHub</a></p>
+      </footer>
+    </section>
+
+    <!-- ================= CREATE ================= -->
+    <section class="view" id="view-create" aria-label="Create a bouquet" hidden>
+      <div class="builder wrap">
+        <div class="preview-col">
+          <div class="preview-card">
+            <svg id="builderSvg" class="bouquet anim" viewBox="20 50 360 430" role="img" aria-label="Your bouquet preview"></svg>
+            <div class="empty-hint" id="emptyHint">
+              <p>Your bouquet is waiting for its first flower.</p>
+            </div>
+            <div class="gift-tag" id="previewTag" aria-hidden="true"><span>To</span> <strong id="tagName">someone special</strong></div>
+          </div>
+          <div class="preview-tools">
+            <span id="stemCount" aria-live="polite">0 stems</span>
+            <button class="chip-btn" id="shuffleBtn" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Rearrange
+            </button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <ol class="stepper" id="stepper" aria-label="Steps">
+            <li><button type="button" data-goto="0"><i>1</i><span>Occasion</span></button></li>
+            <li><button type="button" data-goto="1"><i>2</i><span>Flowers</span></button></li>
+            <li><button type="button" data-goto="2"><i>3</i><span>Wrap</span></button></li>
+            <li><button type="button" data-goto="3"><i>4</i><span>Note</span></button></li>
+            <li><button type="button" data-goto="4"><i>5</i><span>Send</span></button></li>
+          </ol>
+          <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+          <div class="steps">
+            <div class="step" data-step="0">
+              <h2>What's the occasion?</h2>
+              <p class="hint">We'll suggest a bouquet and a note. You can change anything.</p>
+              <div class="occasion-grid compact" id="occasionChoices"></div>
+            </div>
+
+            <div class="step" data-step="1">
+              <h2>Pick your flowers</h2>
+              <p class="hint">Tap to add, up to 12 stems. Hover or focus a flower to see its meaning.</p>
+              <div class="chosen" id="chosen" aria-live="polite"></div>
+              <div class="row-actions">
+                <button class="chip-btn" id="surpriseBtn" type="button">✦ Surprise me</button>
+                <button class="chip-btn" id="presetBtn" type="button" hidden></button>
+                <button class="chip-btn subtle" id="clearBtn" type="button">Clear</button>
+              </div>
+              <div class="catalog" id="catalog"></div>
+            </div>
+
+            <div class="step" data-step="2">
+              <h2>Wrap it up</h2>
+              <p class="hint">The paper and ribbon finish the bouquet.</p>
+              <fieldset class="swatch-set">
+                <legend>Paper</legend>
+                <div class="swatches" id="wrapSwatches"></div>
+              </fieldset>
+              <fieldset class="swatch-set">
+                <legend>Ribbon</legend>
+                <div class="swatches" id="ribbonSwatches"></div>
+              </fieldset>
+            </div>
+
+            <div class="step" data-step="3">
+              <h2>Write your note</h2>
+              <div class="field-row">
+                <label class="field"><span>To</span><input id="toInput" maxlength="40" autocomplete="off" placeholder="Their name"></label>
+                <label class="field"><span>From</span><input id="fromInput" maxlength="40" autocomplete="off" placeholder="Your name"></label>
+              </div>
+              <label class="field">
+                <span>Your note</span>
+                <textarea id="msgInput" maxlength="280" rows="5" placeholder="Write something only you could say…"></textarea>
+              </label>
+              <div class="msg-meta">
+                <button class="chip-btn" id="inspireBtn" type="button">✎ Inspire me</button>
+                <span id="msgCount">0 / 280</span>
+              </div>
+              <details class="surprise" id="surpriseBox">
+                <summary>Make it a surprise: choose the day it opens</summary>
+                <label class="field"><span>Opens on</span><input type="date" id="dateInput"></label>
+                <p class="hint small">Until then they'll see a sealed envelope with a countdown. Leave empty to open right away.</p>
+              </details>
+            </div>
+
+            <div class="step" data-step="4">
+              <h2>Ready to send 💌</h2>
+              <p class="hint" id="sendSummary"></p>
+              <div class="warn" id="sendWarn" hidden></div>
+              <div class="link-box" id="linkBox">
+                <label for="linkOut" class="sr-only">Gift link</label>
+                <input id="linkOut" readonly>
+                <button class="btn btn-primary btn-small" id="copyBtn" type="button"><span>Copy link</span></button>
+              </div>
+              <div class="share-grid" id="shareGrid">
+                <a class="share wa" id="waBtn" target="_blank" rel="noopener">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.6.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.1 5.1 0 0 0 1.1 2.7 11.7 11.7 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3Z"/></svg>
+                  WhatsApp
+                </a>
+                <a class="share mail" id="mailBtn">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3zM3 7l9 6 9-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                  Email
+                </a>
+                <button class="share native" id="nativeShareBtn" type="button" hidden>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 14v6h14v-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  Share…
+                </button>
+                <button class="share preview" id="previewBtn" type="button">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+                  Preview as them
+                </button>
+              </div>
+              <p class="hint small">Your bouquet and note are stored only inside this link. Anyone who has the link can open it.</p>
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <button class="btn btn-ghost" id="backBtn" type="button">Back</button>
+            <button class="btn btn-primary" id="nextBtn" type="button">Next</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= GIFT ================= -->
+    <section class="view" id="view-gift" aria-label="Your flower gift" hidden>
+      <div class="gift wrap">
+        <button class="chip-btn back-edit" id="backToEdit" type="button" hidden>← Back to editing</button>
+
+        <div class="envelope-stage" id="envelopeStage">
+          <p class="env-kicker" id="envKicker">You've got flowers</p>
+          <div class="envelope" id="envelope">
+            <div class="env-back"></div>
+            <div class="env-flap"></div>
+            <div class="env-letter"><span>for</span><strong id="envLetterName">you</strong></div>
+            <div class="env-front"><span class="env-to">To: <b id="envTo">you</b></span></div>
+            <button class="seal" id="seal" type="button" aria-label="Open your flowers">
+              <svg viewBox="-32 -32 64 64" aria-hidden="true"><g fill="#fff" opacity=".9"><circle r="9" cy="-11"/><circle r="9" cy="-11" transform="rotate(72)"/><circle r="9" cy="-11" transform="rotate(144)"/><circle r="9" cy="-11" transform="rotate(216)"/><circle r="9" cy="-11" transform="rotate(288)"/></g><circle r="6" fill="#F4B63F"/></svg>
+            </button>
+          </div>
+          <p class="env-hint" id="envHint">Tap the seal to open</p>
+          <div class="countdown" id="countdown" hidden></div>
+        </div>
+
+        <div class="reveal" id="reveal" hidden>
+          <div class="reveal-art">
+            <div class="halo" aria-hidden="true"></div>
+            <svg id="giftSvg" class="bouquet anim" viewBox="20 50 360 430" role="img" aria-label="Your bouquet"></svg>
+          </div>
+          <div class="reveal-side">
+            <article class="note-card" id="noteCard">
+              <p class="note-to">Dear <span id="noteTo"></span>,</p>
+              <p class="note-msg" id="noteMsg" aria-live="polite"></p>
+              <p class="note-from" id="noteFromWrap">— <span id="noteFrom"></span></p>
+            </article>
+            <div class="meaning-list" id="meaningList"></div>
+            <div class="gift-actions" id="giftActions">
+              <button class="btn btn-primary" id="sendBackBtn" type="button">Send flowers back ↩</button>
+              <button class="btn btn-ghost" id="keepsakeBtn" type="button">Save keepsake</button>
+              <button class="chip-btn" id="replayBtn" type="button">↻ Replay</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="broken" id="brokenGift" hidden>
+          <h2>This bouquet link is incomplete</h2>
+          <p>Part of the link may have been cut off when it was copied. Ask the sender to share it again, or make a bouquet yourself.</p>
+          <a href="#/create" class="btn btn-primary" data-new>Make a bouquet</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/flowers.js?v=3"></script>
+  <script src="js/app.js?v=3"></script>
+</body>
+</html>
