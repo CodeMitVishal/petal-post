@@ -61,6 +61,41 @@ values ('ip_salt', md5(random()::text || clock_timestamp()::text || random()::te
 on conflict (k) do nothing;
 revoke all on private.secrets from public, anon, authenticated;
 
+-------------------------------------------------------------------------------
+-- Allowed website: only pages on this origin may use the database from a browser.
+-- Browsers attach the Origin header themselves and pages cannot change it, so other
+-- websites can't use this project's key. (Scripts outside a browser can fake the header;
+-- the per-person rate limits and validation below still apply to them.)
+-- To allow more sites, use a comma-separated list, e.g. 'https://a.com,https://b.com'.
+-------------------------------------------------------------------------------
+insert into private.secrets (k, v) values ('allowed_origins', 'https://codemitvishal.github.io')
+on conflict (k) do update set v = excluded.v;
+
+create or replace function private.origin_ok()
+returns boolean
+language sql stable security definer set search_path = ''
+as $$
+  select coalesce(
+    (nullif(current_setting('request.headers', true), '')::json ->> 'origin')
+      = any (string_to_array((select v from private.secrets where k = 'allowed_origins'), ',')),
+    false);
+$$;
+
+create or replace function private.require_origin()
+returns void
+language plpgsql stable security definer set search_path = ''
+as $$
+begin
+  if not private.origin_ok() then
+    raise exception 'This website is not allowed to use the Petal Post database.' using errcode = '42501';
+  end if;
+end;
+$$;
+revoke all on function private.origin_ok() from public;
+revoke all on function private.require_origin() from public;
+grant usage on schema private to anon, authenticated;
+grant execute on function private.origin_ok() to anon, authenticated;
+
 create or replace function private.gifts_guard()
 returns trigger
 language plpgsql security definer set search_path = ''
@@ -70,6 +105,7 @@ declare
   ip     text := trim(split_part(coalesce(hdrs ->> 'cf-connecting-ip', hdrs ->> 'x-forwarded-for', hdrs ->> 'x-real-ip', ''), ',', 1));
   recent int;
 begin
+  perform private.require_origin();
   select count(*) into recent from public.gifts where created_at > now() - interval '1 minute';
   if recent >= 60 then
     raise exception 'The flower wall is busy, please try again in a minute.' using errcode = 'P0001';
@@ -108,6 +144,7 @@ create or replace function public.gift_stats()
 returns json
 language sql stable security definer set search_path = ''
 as $$
+  select private.require_origin();
   select json_build_object(
     'bouquets',   count(*),
     'stems',      coalesce(sum(stems), 0),
@@ -124,6 +161,7 @@ returns table (pair text, sender text, recipient text, times bigint, stems bigin
                last_at timestamptz, sender_photo uuid, recipient_photo uuid)
 language sql stable security definer set search_path = ''
 as $$
+  select private.require_origin();
   select left(md5(coalesce(g.sender_key::text, '-') || '|' || lower(g.sender) || '|' || lower(g.recipient)), 16),
          (array_agg(g.sender    order by g.created_at desc))[1],
          (array_agg(g.recipient order by g.created_at desc))[1],
@@ -174,4 +212,5 @@ create policy "petal post photo uploads" on storage.objects
     bucket_id = 'photos'
     and name ~ '^(g|a)/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.jpg$'
     and private.photo_upload_allowed()
+    and private.origin_ok()
   );
