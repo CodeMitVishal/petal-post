@@ -4,6 +4,12 @@ Send flowers that never wilt. Build a bouquet, write a note and share one link. 
 
 **Live:** https://codemitvishal.github.io/petal-post/
 
+<p align="center">
+  <a href="media/petal-post-promo.mp4"><img src="media/preview.gif" width="400" alt="Petal Post demo: a bouquet is built, shared as a link, and blooms when the envelope is opened"></a>
+  <br>
+  <sub>▶ <a href="media/petal-post-promo.mp4">Watch the full video with sound</a></sub>
+</p>
+
 ## How it works
 
 1. **Pick an occasion** (love, birthday, thank you, sorry and more) to get a suggested bouquet and note.
@@ -13,6 +19,16 @@ Send flowers that never wilt. Build a bouquet, write a note and share one link. 
 5. **Share one link** on WhatsApp, by email or anywhere else.
 
 Your person sees a sealed envelope with their name on it. They tap the seal, petals burst, the bouquet grows stem by stem and your note writes itself out.
+
+## Screenshots
+
+| Home | Build your bouquet |
+| --- | --- |
+| <img src="media/screenshots/home.jpg" alt="Home page with an animated bouquet" width="420"> | <img src="media/screenshots/builder.jpg" alt="Bouquet builder with a Grand bouquet, sizes and mood filter" width="420"> |
+| **A sealed envelope arrives** | **The gift blooms** |
+| <img src="media/screenshots/envelope.jpg" alt="Sealed envelope addressed to Maya" width="420"> | <img src="media/screenshots/gift.jpg" alt="Bloomed bouquet with a handwritten note and flower meanings" width="420"> |
+| **Flower wall** (example data) | **On your phone** |
+| <img src="media/screenshots/wall.jpg" alt="Public flower wall showing who sent flowers to whom" width="420"> | <img src="media/screenshots/mobile.jpg" alt="Gift reveal on a phone" width="200"> |
 
 ## Features
 
