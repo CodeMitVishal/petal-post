@@ -31,8 +31,9 @@ GitHub Pages can't store data, so the wall uses a free [Supabase](https://supaba
 
 1. Create a free Supabase project.
 2. Open **SQL Editor → New query**, paste [`supabase/schema.sql`](supabase/schema.sql) and click **Run**.
-3. In **Project Settings → API** (or **Connect**), copy the **Project URL** and the **anon public** (or **publishable**) key.
-4. Paste both into [`js/config.js`](js/config.js), then commit and push.
+3. In **Project Settings → API** (or **Connect**), copy the **Project URL** and the **publishable** key.
+4. In this GitHub repo, open **Settings → Secrets and variables → Actions** and add two repository secrets: `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`.
+5. In **Settings → Pages**, set **Source** to **GitHub Actions**. The [deploy workflow](.github/workflows/deploy.yml) writes both values into `js/config.js` only inside the published site, so they never appear in the repository or its history.
 
 What the database allows: visitors can **add** a gift (first names checked against letters only, max 20 chars, 1–24 stems) and read two summaries, `gift_stats()` for the totals and `gift_wall()` for one row per person → recipient with counts (people are told apart by an anonymous per-browser id that is never returned to the page). Raw rows can't be read, edited or deleted from the site. To remove an entry, delete it in Supabase's **Table Editor**.
 
