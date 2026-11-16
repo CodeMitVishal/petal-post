@@ -1,8 +1,9 @@
 /* Public flower wall settings.
-   Fill both values from Supabase → Project Settings → API Keys to switch the wall on.
-   The publishable key is meant to be public: the database only lets visitors add a gift
-   and read the wall summary (see supabase/schema.sql). Leave empty to keep the wall hidden. */
+   The real values are NOT stored in this repository. They live in the GitHub repository
+   secrets SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY, and the deploy workflow
+   (.github/workflows/deploy.yml) writes them into this file only in the published site.
+   Left empty (e.g. when you open the site locally), the flower wall and photos stay hidden. */
 window.PETAL_CONFIG = {
   supabaseUrl: '',
-  supabaseAnonKey: '', // public publishable key "petal_post_web"
+  supabaseAnonKey: '',
 };

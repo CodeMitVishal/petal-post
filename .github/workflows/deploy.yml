@@ -1,0 +1,68 @@
+# Publishes the site to GitHub Pages.
+# The Supabase URL and publishable key come from repository secrets
+# (Settings → Secrets and variables → Actions) and are written into js/config.js
+# only inside the published artifact, never into the repository.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Write js/config.js from secrets
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABASE_URL}" ] || [ -z "${SUPABASE_PUBLISHABLE_KEY}" ]; then
+            echo "::warning::Supabase secrets are not set; publishing with the flower wall switched off."
+            exit 0
+          fi
+          # Only accept the expected shapes, so a bad secret can't inject code into the page.
+          if ! printf '%s' "${SUPABASE_URL}" | grep -Eq '^https://[a-z0-9]{20}\.supabase\.co$'; then
+            echo "::error::SUPABASE_URL must look like https://<project-ref>.supabase.co"; exit 1
+          fi
+          if ! printf '%s' "${SUPABASE_PUBLISHABLE_KEY}" | grep -Eq '^(sb_publishable_[A-Za-z0-9_-]+|eyJ[A-Za-z0-9_.-]+)$'; then
+            echo "::error::SUPABASE_PUBLISHABLE_KEY must be a publishable (sb_publishable_...) or anon key"; exit 1
+          fi
+          cat > js/config.js <<EOF
+          window.PETAL_CONFIG = {
+            supabaseUrl: '${SUPABASE_URL}',
+            supabaseAnonKey: '${SUPABASE_PUBLISHABLE_KEY}',
+          };
+          EOF
+          echo "config.js written ($(wc -c < js/config.js) bytes)"
+
+      - name: Prepare site folder
+        run: |
+          mkdir -p _site
+          cp -r index.html css js .nojekyll _site/
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
