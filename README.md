@@ -5,9 +5,9 @@ Send flowers that never wilt. Build a bouquet, write a note and share one link. 
 **Live:** https://codemitvishal.github.io/petal-post/
 
 <p align="center">
-  <img src="media/preview.gif" width="400" alt="Petal Post demo: a bouquet is built, shared as a link, and blooms when the envelope is opened">
+  <img src="media/preview.webp" width="480" alt="Petal Post demo: a bouquet is built, shared as a link, and blooms when the envelope is opened">
   <br>
-  <sub>🔊 <a href="https://github.com/CodeMitVishal/petal-post/raw/main/media/petal-post-promo.mp4">Download the full video with sound</a> (MP4, 9 MB)</sub>
+  <sub>🔊 <a href="https://github.com/CodeMitVishal/petal-post/raw/main/media/petal-post.mp4">Download the full video with sound</a> (MP4, 9 MB)</sub>
 </p>
 
 ## How it works
