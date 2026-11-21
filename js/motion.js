@@ -207,10 +207,18 @@
 
   // A tapped flower arcs into the bouquet.
   on('flower-added', ({ from }) => {
-    const src = from && from.querySelector('svg'), target = $('#builderSvg');
+    const src = from && from.querySelector('svg');
+    let target = $('#builderSvg');
     if (!src || !target) return;
-    const a = src.getBoundingClientRect(), b = target.getBoundingClientRect();
-    if (b.bottom < 0 || b.top > innerHeight) return; // preview scrolled away (phones)
+    const a = src.getBoundingClientRect();
+    let b = target.getBoundingClientRect();
+    if (b.bottom < 60 || b.top > innerHeight) {
+      // preview scrolled away (phones): fly into the little bouquet in the bottom bar instead
+      const mini = $('#navMini');
+      if (!mini || !mini.offsetParent) return;
+      target = mini; b = mini.getBoundingClientRect();
+      mini.classList.remove('got'); void mini.offsetWidth; mini.classList.add('got');
+    }
     const clone = src.cloneNode(true);
     clone.classList.add('fly-clone');
     Object.assign(clone.style, { left: a.left + 'px', top: a.top + 'px', width: a.width + 'px', height: a.height + 'px' });

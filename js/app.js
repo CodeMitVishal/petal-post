@@ -616,7 +616,7 @@
       b.className = 'size-opt';
       b.dataset.size = Z.id;
       b.setAttribute('role', 'radio');
-      b.innerHTML = `${sizeIcon(Z.id)}<span><strong>${Z.name}</strong><small>${{ s: 'Short & sweet', m: 'Just right', l: 'Big & lush', x: 'A showstopper' }[Z.id]} · up to ${Z.max}</small></span>`;
+      b.innerHTML = `${sizeIcon(Z.id)}<span><strong>${Z.name}</strong><small><span class="sz-sub">${{ s: 'Short & sweet', m: 'Just right', l: 'Big & lush', x: 'A showstopper' }[Z.id]} · </span>up to ${Z.max}</small></span>`;
       b.addEventListener('click', () => chooseSize(Z.id, b));
       sp.appendChild(b);
     });
@@ -829,6 +829,7 @@
       face.querySelector('.face-x').addEventListener('click', () => { state[key] = ''; save(); renderPhotos(); });
     });
     initStemEditing();
+    $('#navMini').addEventListener('click', () => $('.preview-card').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'center' }));
     $('#previewBtn').addEventListener('click', () => {
       if (!state.items.length) return;
       sess.set('pp.preview', '1');
@@ -1101,12 +1102,12 @@
     }
     const b = $('#copyBtn');
     if (ok) {
-      b.classList.add('copied'); b.firstElementChild.textContent = 'Copied ✓';
+      b.classList.add('copied'); b.querySelector('.lbl').textContent = 'Copied ✓';
       const data = giftData();
       Wall.record(data, encode(data));
       burstFrom(b, 18);
       emit('shared', { from: b });
-      setTimeout(() => { b.classList.remove('copied'); b.firstElementChild.textContent = 'Copy link'; }, 1800);
+      setTimeout(() => { b.classList.remove('copied'); b.querySelector('.lbl').textContent = 'Copy link'; }, 1800);
     } else toast('Copy failed. Select the link and copy it manually.');
   }
 
@@ -1145,6 +1146,7 @@
   /* ---------- render ---------- */
   const settleTimers = new WeakMap();
   const posOf = {}; // where each stem was last laid out, by uid
+  let miniTimer = 0;
   function renderPreview() {
     const svg = $('#builderSvg'), layer = $('.stems', svg);
     const list = ordered();
@@ -1173,6 +1175,9 @@
     F.recolor(svg, state.w, state.r);
     $('#emptyHint').classList.toggle('gone', list.length > 0);
     $('#editTip').hidden = list.length < 2;
+    $('#navMiniCount').textContent = `${list.length}/${maxStems()}`;
+    clearTimeout(miniTimer);
+    miniTimer = setTimeout(() => ($('#navMini svg').innerHTML = list.length ? F.bouquetSVG(list.map(i => i.id), { size: state.z, w: state.w, r: state.r, seed: state.s }) : ''), 120);
     if (popUid && !present.has(popUid)) closePop();
     else markPicked();
     const n = list.length;
@@ -1277,10 +1282,17 @@
         face.querySelector('.initial').textContent = ((initials[face.dataset.who] || '?').match(/\p{L}/u) || ['?'])[0].toUpperCase();
       });
     }
-    $('#waBtn').href = 'https://wa.me/?text=' + encodeURIComponent(shareText());
-    $('#mailBtn').href = `mailto:?subject=${encodeURIComponent('I sent you flowers 💐')}&body=${encodeURIComponent(shareText())}`;
+    // the share links only exist once the bouquet can really be sent (flowers + both names)
+    [['#waBtn', 'https://wa.me/?text=' + encodeURIComponent(shareText())],
+     ['#mailBtn', `mailto:?subject=${encodeURIComponent('I sent you flowers 💐')}&body=${encodeURIComponent(shareText())}`]].forEach(([sel, href]) => {
+      const a = $(sel);
+      if (ok) { a.href = href; a.removeAttribute('aria-disabled'); a.tabIndex = 0; }
+      else { a.removeAttribute('href'); a.setAttribute('aria-disabled', 'true'); a.tabIndex = -1; }
+    });
+    $$('#shareGrid button').forEach(b => (b.disabled = !ok));
   }
 
+  let sentCheer = '';
   function renderSteps(fromLeft) {
     const n = state.step;
     $$('.step').forEach(s => {
@@ -1295,6 +1307,12 @@
       b.classList.toggle('done', i < n);
     });
     $('#progressBar').style.width = `${(n / 4) * 100}%`;
+    $('.builder').dataset.step = n;
+    const ready = state.items.length + '|' + state.t + '|' + state.f;
+    if (n === 4 && sentCheer !== ready && namesOk() && state.items.length) {
+      sentCheer = ready; // a small celebration when the bouquet is ready to go
+      setTimeout(() => burstFrom($('.step[data-step="4"] h2'), 22), reduced() ? 0 : 380);
+    }
     if (n === 1) requestAnimationFrame(measureChosen);
     $('#backBtn').textContent = n === 0 ? 'Home' : 'Back';
     const next = $('#nextBtn');
@@ -1554,6 +1572,9 @@
     card.style.setProperty('--cd', `${Math.min(growTime, 2.2)}s`);
 
     $('#noteTo').textContent = gift.t || 'you';
+    const occ = OCC[gift.o], chipEl = $('#giftOccasion');
+    chipEl.hidden = !occ;
+    if (occ) chipEl.textContent = `${occ.emoji} ${{ love: 'With love', birthday: 'Happy birthday', thanks: 'Thank you', sorry: "I'm sorry", getwell: 'Get well soon', congrats: 'Congratulations', sympathy: 'Thinking of you', just: 'Just because' }[gift.o] || occ.label}`;
     $('#noteFrom').textContent = gift.f || 'someone who cares';
     const fig = $('#notePhoto'), pimg = $('#notePhotoImg'), psrc = Photos.url('g', gift.p);
     fig.hidden = true;

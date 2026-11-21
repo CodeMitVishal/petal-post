@@ -117,3 +117,5 @@
   .split .wi { transform: none !important; }
   .brand span { color: var(--ink); background: none; }
 }
+/* on phones the floating hero petals must not widen the page */
+@media (max-width: 600px) { .hero-art { overflow-x: clip; } }
