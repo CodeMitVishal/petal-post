@@ -2,11 +2,11 @@
 # The Supabase URL and publishable key come from repository secrets
 # (Settings → Secrets and variables → Actions) and are written into js/config.js
 # only inside the published artifact, never into the repository.
+# It runs only when started by hand (Actions → Deploy to GitHub Pages → Run workflow,
+# or `gh workflow run deploy.yml`), not on every push.
 name: Deploy to GitHub Pages
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:

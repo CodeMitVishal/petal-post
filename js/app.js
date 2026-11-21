@@ -361,6 +361,7 @@
 
     function init() {
       $('#wallNav').hidden = !on();
+      $('#wallPeek').hidden = !on();
       $('#wallSearch').addEventListener('input', renderAll);
     }
 
@@ -511,7 +512,7 @@
   /* ================= BUILDER ================= */
   let uidN = 0;
   const newItem = (id, k = Math.random()) => ({ uid: `u${++uidN}`, id, k });
-  const blankState = () => ({ o: '', items: [], aside: [], z: 'm', w: 'kraft', r: 'ruby', t: '', f: '', m: '', mAuto: false, d: '', s: randSeed(), step: 0, touched: false, noteIdx: 0, wall: false, p: '', ps: '', pr: '', mood: 'all', sel: {} });
+  const blankState = () => ({ o: '', items: [], aside: [], z: 'm', w: 'kraft', r: 'ruby', t: '', f: '', m: '', mAuto: false, d: '', s: randSeed(), step: 0, touched: false, noteIdx: 0, wall: false, p: '', ps: '', pr: '', colors: [], moods: [], sel: {} });
   const previews = {}; // local blob previews for photos picked in this session
   let chosenOpen = false; // "Show all kinds" toggle for the picked-flowers list
 
@@ -561,7 +562,9 @@
     s.items = (d.items || []).filter(i => F.BY_ID[i.id]).slice(0, sizeOf(s.z).max).map(i => newItem(i.id, +i.k || Math.random()));
     s.aside = (Array.isArray(d.aside) ? d.aside : []).filter(id => F.BY_ID[id]).slice(0, MAX_ALL);
     s.mAuto = !!d.mAuto; s.touched = !!d.touched; s.wall = !!d.wall;
-    s.mood = d.mood === 'all' || F.MOODS.some(m => m.id === d.mood) ? d.mood : 'all';
+    const ok = (list, all) => (Array.isArray(list) ? list.filter(x => all.some(a => a.id === x)) : []);
+    s.colors = ok(d.colors, F.COLORS);
+    s.moods = ok(d.moods || (d.mood && d.mood !== 'all' ? [d.mood] : []), F.MOODS); // older drafts kept a single mood
     if (d.sel && typeof d.sel === 'object') Object.entries(d.sel).forEach(([fam, id]) => { if (F.FAM_BY_ID[fam] && F.BY_ID[id] && F.BY_ID[id].fam === fam) s.sel[fam] = id; });
     s.ps = Photos.valid(d.ps) ? d.ps : ''; s.pr = Photos.valid(d.pr) ? d.pr : ''; s.step = Math.min(4, Math.max(0, d.step | 0));
     return s;
@@ -627,18 +630,43 @@
       sp.querySelector(`[data-size="${next}"]`).focus();
     });
 
-    // mood filter for the whole catalog
+    // filters: colour swatches and mood chips, both multi-select
+    const toggle = (list, id) => (list.includes(id) ? list.filter(x => x !== id) : [...list, id]);
+    const cf = $('#colorFilter');
+    F.COLORS.forEach(c => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'color-chip';
+      b.dataset.color = c.id;
+      b.title = `${c.name} flowers (${c.ids.length})`;
+      b.innerHTML = `<i style="--sw:${c.sw}"></i><span></span>`;
+      b.querySelector('span').textContent = c.name;
+      b.addEventListener('click', () => { state.colors = toggle(state.colors, c.id); save(); renderFilters(true); });
+      cf.appendChild(b);
+    });
     const mf = $('#moodFilter');
-    [{ id: 'all', name: 'All', ids: F.CATALOG.map(f => f.id) }, ...F.MOODS].forEach(m => {
+    [{ id: 'all', name: 'Any mood', ids: F.CATALOG.map(f => f.id) }, ...F.MOODS].forEach(m => {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'mood-chip';
       b.dataset.mood = m.id;
       b.innerHTML = `<span></span><b>${m.ids.length}</b>`;
       b.firstChild.textContent = m.name;
-      b.addEventListener('click', () => { state.mood = m.id; save(); renderMood(true); });
+      b.addEventListener('click', () => { state.moods = m.id === 'all' ? [] : toggle(state.moods, m.id); save(); renderFilters(true); });
       mf.appendChild(b);
     });
+    // On phones the catalog is long: a floating button brings the filters back.
+    const jump = $('#filterJump'), bar = $('#filterBar');
+    document.body.appendChild(jump); // fixed to the screen, outside the animated step
+    jump.addEventListener('click', () => { bar.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); setTimeout(() => $('#flowerSearch').focus({ preventScroll: true }), 450); });
+    let jumpTick = false;
+    const placeJump = () => {
+      jumpTick = false;
+      const visible = state.step === 1 && !!bar.offsetParent && location.hash.startsWith('#/create');
+      jump.classList.toggle('show', visible && bar.getBoundingClientRect().bottom < 0 && $('#catalog').getBoundingClientRect().bottom > innerHeight * 0.6);
+    };
+    addEventListener('scroll', () => { if (!jumpTick) { jumpTick = true; requestAnimationFrame(placeJump); } }, { passive: true });
+    addEventListener('hashchange', placeJump);
 
     // occasions
     const oc = $('#occasionChoices');
@@ -701,7 +729,8 @@
       cat.appendChild(card);
       paintCard(card, false);
     });
-    $('#flowerSearch').addEventListener('input', e => { query = e.target.value; renderMood(true); });
+    $('#flowerSearch').addEventListener('input', e => { query = e.target.value; renderFilters(true); });
+    $('#flowerSearch').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } });
 
     $('#surpriseBtn').addEventListener('click', e => {
       // a harmonious surprise: flowers from one mood, finished with a filler
@@ -740,8 +769,11 @@
 
     // note fields
     const to = $('#toInput'), from = $('#fromInput'), msg = $('#msgInput'), date = $('#dateInput');
-    to.addEventListener('input', () => { state.t = to.value; renderTag(true); renderSend(); save(); });
-    from.addEventListener('input', () => { state.f = from.value; renderSend(); save(); });
+    const fixName = () => { if ($('#toField').classList.contains('invalid') || $('#fromField').classList.contains('invalid')) showNameErrors(false); };
+    to.addEventListener('input', () => { state.t = to.value; renderTag(true); renderSend(); fixName(); save(); });
+    from.addEventListener('input', () => { state.f = from.value; renderSend(); fixName(); save(); });
+    to.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); from.focus(); } });
+    from.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); msg.focus(); } });
     msg.addEventListener('input', () => { emit('typing', { field: msg }); state.m = msg.value; state.mAuto = false; renderCount(); renderSend(); save(); });
     date.min = todayStr();
     date.addEventListener('change', () => { state.d = date.value && date.value > todayStr() ? date.value : ''; if (date.value && !state.d) date.value = ''; renderSend(); save(); });
@@ -796,6 +828,7 @@
       face.querySelector('input').addEventListener('change', e => { pickPhoto(e.target.files[0], 'a', key, face.querySelector('.avatar-busy')); e.target.value = ''; });
       face.querySelector('.face-x').addEventListener('click', () => { state[key] = ''; save(); renderPhotos(); });
     });
+    initStemEditing();
     $('#previewBtn').addEventListener('click', () => {
       if (!state.items.length) return;
       sess.set('pp.preview', '1');
@@ -880,12 +913,177 @@
     if (list.length) removeOne(list[list.length - 1].id);
   }
 
+  /* ---------- edit stems right in the bouquet ----------
+     Tap a flower: a small menu to recolour, move, add one more or remove it.
+     Drag a flower onto another to swap their places (touch: press and hold first, so scrolling still works). */
+  let popUid = '';
+  const itemOf = uid => state.items.find(i => i.uid === uid);
+
+  function initStemEditing() {
+    const svg = $('#builderSvg'), layer = $('.stems', svg), card = $('.preview-card'), pop = $('#stemPop');
+    let drag = null, holdTimer = 0;
+    const toSvg = e => { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); };
+
+    layer.addEventListener('pointerdown', e => {
+      const g = e.target.closest('.sg');
+      if (!g || g.classList.contains('leaving') || e.button > 0) return;
+      const it = itemOf(g.dataset.uid);
+      if (!it) return;
+      drag = { g, it, x: e.clientX, y: e.clientY, id: e.pointerId, live: false, touch: e.pointerType !== 'mouse', target: null };
+      if (drag.touch) holdTimer = setTimeout(startDrag, 280);
+    });
+    function startDrag() {
+      if (!drag || drag.live) return;
+      drag.live = true;
+      closePop();
+      layer.appendChild(drag.g); // lift it above its neighbours
+      drag.g.classList.add('dragging');
+      card.classList.add('editing');
+      if (drag.touch && navigator.vibrate) navigator.vibrate(10);
+    }
+    addEventListener('pointermove', e => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const moved = Math.hypot(e.clientX - drag.x, e.clientY - drag.y);
+      if (!drag.live) {
+        if (drag.touch) { if (moved > 10) { clearTimeout(holdTimer); drag = null; } return; } // it was a scroll
+        if (moved < 5) return;
+        startDrag();
+      }
+      const p = toSvg(e), G = F.G;
+      const a = Math.max(-64, Math.min(64, (Math.atan2(p.x - G.x, G.y - p.y) * 180) / Math.PI));
+      const r = Math.max(110, Math.min(330, Math.hypot(p.x - G.x, G.y - p.y)));
+      F.applyPos(drag.g, drag.it.id, { ...posOf[drag.it.uid], a, r });
+      let best = null, bd = Infinity;
+      $$('.sg:not(.leaving)', layer).forEach(o => {
+        if (o === drag.g) return;
+        const b = o.querySelector('.bloom').getBoundingClientRect();
+        const d = Math.hypot(b.left + b.width / 2 - e.clientX, b.top + b.height / 2 - e.clientY);
+        if (d < bd) { bd = d; best = o; }
+      });
+      const near = bd < 64 ? best : null;
+      if (near !== drag.target) {
+        if (drag.target) drag.target.classList.remove('drop-target');
+        if (near) near.classList.add('drop-target');
+        drag.target = near;
+      }
+    });
+    // while a stem is lifted on a touch screen, the finger moves the stem, not the page
+    svg.addEventListener('touchmove', e => { if (drag && drag.live) e.preventDefault(); }, { passive: false });
+    svg.addEventListener('contextmenu', e => { if (drag) e.preventDefault(); });
+    const end = e => {
+      if (!drag || e.pointerId !== drag.id) return;
+      clearTimeout(holdTimer);
+      const d = drag;
+      drag = null;
+      const moved = Math.hypot(e.clientX - d.x, e.clientY - d.y);
+      if (!d.live || moved < 8) {
+        if (d.live) { d.g.classList.remove('dragging'); card.classList.remove('editing'); renderPreview(); }
+        if (e.type === 'pointerup') openPop(d.it.uid);
+        return;
+      }
+      d.g.classList.remove('dragging');
+      card.classList.remove('editing');
+      if (d.target) d.target.classList.remove('drop-target');
+      const other = d.target && e.type === 'pointerup' ? itemOf(d.target.dataset.uid) : null;
+      if (other) {
+        [d.it.k, other.k] = [other.k, d.it.k];
+        state.touched = true;
+        emit('stems-swapped', { from: d.target });
+      }
+      renderPreview();
+      save();
+    };
+    addEventListener('pointerup', end);
+    addEventListener('pointercancel', end);
+
+    pop.querySelector('.sp-x').addEventListener('click', closePop);
+    pop.addEventListener('click', e => {
+      const b = e.target.closest('[data-act]');
+      const it = itemOf(popUid);
+      if (!b || !it) return;
+      const act = b.dataset.act;
+      if (act === 'del') { closePop(); removeItem(it.uid); return; }
+      if (act === 'dup') { addFlower(it.id, null); return; }
+      // move: swap with the nearest stem on that side
+      const mine = posOf[it.uid].a, dir = act === 'left' ? -1 : 1;
+      let best = null;
+      state.items.forEach(o => {
+        const p = posOf[o.uid];
+        if (o === it || !p || (p.a - mine) * dir <= 0) return;
+        if (!best || Math.abs(p.a - mine) < Math.abs(posOf[best.uid].a - mine)) best = o;
+      });
+      if (!best) { toast(`That's already the ${act === 'left' ? 'left' : 'right'}most flower.`); return; }
+      [it.k, best.k] = [best.k, it.k];
+      state.touched = true;
+      renderPreview(); save();
+      markPicked();
+    });
+    document.addEventListener('pointerdown', e => { if (!pop.hidden && !pop.contains(e.target) && !e.target.closest('#builderSvg .sg')) closePop(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !pop.hidden) closePop(); });
+  }
+
+  function openPop(uid) {
+    const it = itemOf(uid), pop = $('#stemPop');
+    if (!it) return;
+    popUid = uid;
+    const f = F.BY_ID[it.id], fam = F.FAM_BY_ID[f.fam];
+    pop.querySelector('.sp-thumb').innerHTML = F.headThumb(it.id);
+    pop.querySelector('strong').textContent = f.name;
+    pop.querySelector('small').textContent = f.meaning;
+    const dots = pop.querySelector('.sp-dots');
+    dots.innerHTML = '';
+    dots.hidden = fam.ids.length < 2;
+    fam.ids.forEach(id => {
+      const d = document.createElement('button');
+      d.type = 'button';
+      d.className = 'dot';
+      d.setAttribute('role', 'radio');
+      d.setAttribute('aria-checked', id === it.id);
+      d.setAttribute('aria-label', F.BY_ID[id].shade);
+      d.title = F.BY_ID[id].name;
+      d.style.background = dotPaint(F.BY_ID[id]);
+      d.addEventListener('click', () => recolorItem(popUid, id));
+      dots.appendChild(d);
+    });
+    const wasHidden = pop.hidden;
+    pop.hidden = false;
+    if (wasHidden && !reduced()) { pop.classList.remove('pop-in'); void pop.offsetWidth; pop.classList.add('pop-in'); }
+    markPicked();
+  }
+  function closePop() {
+    popUid = '';
+    $('#stemPop').hidden = true;
+    markPicked();
+  }
+  function markPicked() {
+    $$('#builderSvg .sg').forEach(g => g.classList.toggle('picked', !!popUid && g.dataset.uid === popUid));
+  }
+  // A new colour blooms in the same spot: the stem keeps its place, the head is replaced.
+  function recolorItem(uid, id) {
+    const it = itemOf(uid);
+    if (!it || it.id === id) return;
+    const fresh = newItem(id, it.k);
+    state.items = state.items.map(x => (x.uid === uid ? fresh : x));
+    state.touched = true;
+    renderAll();
+    openPop(fresh.uid);
+    emit('shade-picked', { from: $(`#builderSvg .sg[data-uid="${fresh.uid}"] .head`), color: F.BY_ID[id].c.base });
+  }
+  function removeItem(uid) {
+    state.items = state.items.filter(x => x.uid !== uid);
+    state.touched = true;
+    renderAll();
+  }
+
   // Search matches a family name, a colour, a flower's name or its meaning.
   function flowerMatches(f) {
     const q = query.trim().toLowerCase();
     if (!q) return true;
     const fam = F.FAM_BY_ID[f.fam].name;
-    return q.split(/\s+/).every(w => `${f.name} ${fam} ${f.meaning} ${f.mood}`.toLowerCase().includes(w));
+    const color = F.COLORS.find(c => c.id === f.color).name;
+    const hay = `${f.name} ${fam} ${f.meaning} ${f.mood} ${color}`.toLowerCase();
+    // "roses" finds roses, "lilies" finds lilies
+    return q.split(/\s+/).every(w => hay.includes(w) || (w.length > 3 && hay.includes(w.replace(/(ies|es|s)$/, m => (m === 'ies' ? 'y' : '')))));
   }
 
   function shareText(withUrl = true) {
@@ -894,7 +1092,7 @@
   }
 
   async function copyLink() {
-    if (!state.items.length) return;
+    if (!state.items.length || !namesOk()) return;
     const url = giftUrl();
     let ok = false;
     try { await navigator.clipboard.writeText(url); ok = true; } catch {
@@ -912,7 +1110,31 @@
     } else toast('Copy failed. Select the link and copy it manually.');
   }
 
+  // Both names are required before a bouquet can be sent: the envelope shows who it's for,
+  // and the note is signed by who it's from.
+  const namesOk = () => !!(state.t.trim() && state.f.trim());
+  function showNameErrors(shake) {
+    let first = null;
+    [['to', state.t], ['from', state.f]].forEach(([k, v]) => {
+      const field = $(`#${k}Field`), bad = !v.trim();
+      field.classList.toggle('invalid', bad);
+      $(`#${k}Err`).hidden = !bad;
+      $(`#${k}Input`).setAttribute('aria-invalid', bad);
+      if (bad && shake) { field.classList.remove('shake'); void field.offsetWidth; field.classList.add('shake'); }
+      if (bad && !first) first = $(`#${k}Input`);
+    });
+    return first;
+  }
+
   function goStep(n) {
+    if (n === 4 && state.items.length && !namesOk()) {
+      // send needs both names: go to the note step and point at what's missing
+      if (state.step !== 3) { state.step = 3; save(); renderSteps(true); }
+      const first = showNameErrors(true);
+      toast('Add both names to send your flowers.');
+      setTimeout(() => first && first.focus(), reduced() ? 0 : 320);
+      return;
+    }
     const prev = state.step;
     state.step = n;
     save();
@@ -922,6 +1144,7 @@
 
   /* ---------- render ---------- */
   const settleTimers = new WeakMap();
+  const posOf = {}; // where each stem was last laid out, by uid
   function renderPreview() {
     const svg = $('#builderSvg'), layer = $('.stems', svg);
     const list = ordered();
@@ -938,6 +1161,7 @@
     let delay = 0;
     F.drawOrder(pos).forEach(idx => {
       const it = list[idx], p = pos[idx];
+      posOf[it.uid] = p;
       const g = layer.querySelector(`.sg[data-uid="${it.uid}"]:not(.leaving)`);
       if (g) { F.applyPos(g, it.id, p); return; }
       layer.insertAdjacentHTML('beforeend', F.stemMarkup(it.id, p, { uid: it.uid, animate: true, delay }));
@@ -948,6 +1172,9 @@
     });
     F.recolor(svg, state.w, state.r);
     $('#emptyHint').classList.toggle('gone', list.length > 0);
+    $('#editTip').hidden = list.length < 2;
+    if (popUid && !present.has(popUid)) closePop();
+    else markPicked();
     const n = list.length;
     $('#stemCount').textContent = `${sizeOf(state.z).name} · ${n} ${n === 1 ? 'stem' : 'stems'} of ${maxStems()}`;
     const meter = $('#stemMeter');
@@ -1014,18 +1241,20 @@
   function renderSend() {
     const n = state.items.length;
     const warn = $('#sendWarn');
-    const ok = n > 0;
+    const ok = n > 0 && namesOk();
     $('#linkBox').classList.toggle('disabled', !ok);
     $('#shareGrid').classList.toggle('disabled', !ok);
-    if (!ok) {
+    if (!n) {
       warn.hidden = false;
       warn.innerHTML = '<span>Your bouquet is empty. Add at least one flower.</span><button class="chip-btn" type="button">Pick flowers</button>';
       warn.querySelector('button').onclick = () => goStep(1);
       $('#linkOut').value = '';
-    } else if (!state.t.trim()) {
+    } else if (!ok) {
+      const missing = !state.t.trim() && !state.f.trim() ? 'both names' : !state.t.trim() ? 'their name' : 'your name';
       warn.hidden = false;
-      warn.innerHTML = "<span>Tip: add their name so the envelope says who it's for.</span><button class=\"chip-btn\" type=\"button\">Add name</button>";
-      warn.querySelector('button').onclick = () => { goStep(3); setTimeout(() => $('#toInput').focus(), 300); };
+      warn.innerHTML = `<span>Add ${missing} to get your link.</span><button class="chip-btn" type="button">Add ${missing === 'both names' ? 'names' : 'name'}</button>`;
+      warn.querySelector('button').onclick = () => goStep(4);
+      $('#linkOut').value = '';
     } else warn.hidden = true;
     if (ok) $('#linkOut').value = giftUrl();
 
@@ -1168,34 +1397,79 @@
     $('#flowersHint').textContent = `Pick a colour, then tap a flower to add it. Up to ${maxStems()} stems for a ${sizeOf(state.z).name}.`;
   }
 
-  function renderMood(animate) {
-    const mood = state.mood || 'all';
-    $$('#moodFilter .mood-chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.mood === mood));
-    let i = 0, shown = 0;
+  // Colour, mood and search narrow the catalog together. Within a filter you can pick several
+  // values (pink + white); a card keeps only the colours that fit and hides when none do.
+  const filtersOn = () => state.colors.length + state.moods.length + (query.trim() ? 1 : 0);
+  const fitsFilters = f => (!state.colors.length || state.colors.includes(f.color)) && (!state.moods.length || state.moods.includes(f.mood)) && flowerMatches(f);
+
+  function renderFilters(animate) {
+    $$('#colorFilter .color-chip').forEach(b => b.setAttribute('aria-pressed', state.colors.includes(b.dataset.color)));
+    $$('#moodFilter .mood-chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.mood === 'all' ? !state.moods.length : state.moods.includes(b.dataset.mood)));
+    let i = 0, kinds = 0, flowers = 0;
     $$('#catalog .flower').forEach(card => {
       const fam = card.dataset.fam;
-      const fits = F.FAM_BY_ID[fam].ids.filter(id => (mood === 'all' || F.BY_ID[id].mood === mood) && flowerMatches(F.BY_ID[id]));
+      const fits = F.FAM_BY_ID[fam].ids.filter(id => fitsFilters(F.BY_ID[id]));
       const show = fits.length > 0;
-      // colours outside the mood or search step back; the card shows the first colour that fits
-      card.querySelectorAll('.dot').forEach(d => d.classList.toggle('dim', !fits.includes(d.dataset.id)));
-      if (animate && show && !fits.includes(selOf(fam))) pickShade(fam, fits[0], false); // only when the filter itself changes
+      card.querySelectorAll('.dot').forEach(d => (d.hidden = !fits.includes(d.dataset.id)));
+      if (show && !fits.includes(selOf(fam))) pickShade(fam, fits[0], false);
       const was = !card.hidden;
       card.hidden = !show;
-      if (show) shown++;
-      if (show && animate && !reduced()) {
+      card.classList.toggle('one-left', F.FAM_BY_ID[fam].ids.length > 1 && fits.length === 1);
+      if (show) { kinds++; flowers += fits.length; }
+      if (show && animate && !reduced() && (!was || i < 14)) {
         card.style.setProperty('--fi', Math.min(i++, 14));
         card.classList.remove('flower-in'); void card.offsetWidth; card.classList.add('flower-in');
       } else if (!was && show) card.classList.remove('flower-in');
     });
+
+    // the summary line and a removable chip for every filter in use
+    const box = $('#appliedFilters');
+    box.innerHTML = '';
+    const count = document.createElement('span');
+    count.className = 'applied-count';
+    count.textContent = filtersOn() ? `${flowers} ${flowers === 1 ? 'flower' : 'flowers'} in ${kinds} ${kinds === 1 ? 'kind' : 'kinds'}` : `All ${F.CATALOG.length} flowers in ${F.FAMILIES.length} kinds`;
+    box.appendChild(count);
+    const chip = (label, sw, off) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'applied-chip';
+      b.innerHTML = `${sw ? `<i style="background:${sw}"></i>` : ''}<span></span><b aria-hidden="true">×</b>`;
+      b.querySelector('span').textContent = label;
+      b.setAttribute('aria-label', `Remove filter: ${label}`);
+      b.addEventListener('click', () => { off(); save(); renderFilters(true); });
+      box.appendChild(b);
+    };
+    state.colors.forEach(id => { const c = F.COLORS.find(x => x.id === id); chip(c.name, c.sw, () => (state.colors = state.colors.filter(x => x !== id))); });
+    state.moods.forEach(id => chip(F.MOODS.find(x => x.id === id).name, '', () => (state.moods = state.moods.filter(x => x !== id))));
+    if (query.trim()) chip(`“${query.trim()}”`, '', () => { query = ''; $('#flowerSearch').value = ''; });
+    if (filtersOn() > 1) {
+      const all = document.createElement('button');
+      all.type = 'button';
+      all.className = 'applied-clear';
+      all.textContent = 'Clear all';
+      all.addEventListener('click', clearFilters);
+      box.appendChild(all);
+    }
+    $('#filterJump').querySelector('b').textContent = filtersOn() || '';
+
     const none = $('#catalogEmpty');
-    if (none) {
-      none.hidden = shown > 0;
-      if (!shown) none.textContent = query.trim() ? `No flowers match “${query.trim()}”. Try a colour like “blue” or a feeling like “love”.` : 'No flowers here.';
+    none.hidden = kinds > 0;
+    if (!kinds) {
+      none.innerHTML = '<span></span><button type="button" class="chip-btn">Clear filters</button>';
+      none.firstChild.textContent = query.trim() ? `No flowers match “${query.trim()}” with these filters.` : 'No flowers match these filters.';
+      none.querySelector('button').addEventListener('click', clearFilters);
     }
   }
 
+  function clearFilters() {
+    state.colors = []; state.moods = []; query = '';
+    $('#flowerSearch').value = '';
+    save();
+    renderFilters(true);
+  }
+
   function renderAll() {
-    renderPreview(); renderSize(); renderMood(false); renderCatalog(); renderSwatches(); renderTag(false); renderFields(); renderPhotos(); renderSend(); renderSteps(false);
+    renderPreview(); renderSize(); renderFilters(false); renderCatalog(); renderSwatches(); renderTag(false); renderFields(); renderPhotos(); renderSend(); renderSteps(false);
     save();
   }
 

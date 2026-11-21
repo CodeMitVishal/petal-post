@@ -87,11 +87,32 @@
     { id: 'js', type: 'jasmine', name: 'Jasmine', meaning: 'Sweet love & grace', c: { base: '#FFFFFF', dark: '#DCD6CB', light: '#F6E08A', bud: '#F3C3D3' } },
     { id: 'vl', type: 'valley', name: 'Lily of the Valley', meaning: 'Happiness returns', c: { base: '#FFFFFF', dark: '#CFD6C4', light: '#F4F7EE' } },
     { id: 'fn', type: 'fern', name: 'Fern', meaning: 'Sincerity & shelter', c: { base: '#79A862', dark: '#557F44', light: '#A5CB8C' } },
+    // baby (spray) roses: a little cluster of small roses on one stem
+    { id: 'sp', type: 'sprayrose', name: 'Pink Baby Roses', meaning: 'Sweet, gentle affection', c: { base: '#F5A3BC', dark: '#D26A8A', light: '#FFD6E2' } },
+    { id: 'sb', type: 'sprayrose', name: 'Blue Baby Roses', meaning: 'Mystery & wonder', c: { base: '#7E9BE3', dark: '#4C68BF', light: '#BCCBF6' } },
+    { id: 'sw', type: 'sprayrose', name: 'White Baby Roses', meaning: 'A new, gentle love', c: { base: '#FFF9F1', dark: '#DACBB4', light: '#FFFFFF' } },
+    { id: 'sh', type: 'sprayrose', name: 'Peach Baby Roses', meaning: 'Warm little thank-yous', c: { base: '#FFBE9C', dark: '#E58E68', light: '#FFE0CF' } },
+    { id: 'se', type: 'sprayrose', name: 'Red Baby Roses', meaning: 'Little love notes', c: { base: '#DC3348', dark: '#A11E32', light: '#F57A8A' } },
+    { id: 'sl', type: 'sprayrose', name: 'Lilac Baby Roses', meaning: 'Enchantment', c: { base: '#C4AEE6', dark: '#9479C7', light: '#E8DDF8' } },
+  ];
+
+  // Colour groups for the colour filter (every flower is in exactly one).
+  const COLORS = [
+    { id: 'red', name: 'Red', sw: '#D7263D', ids: ['rr', 'cr', 'pr', 'tr', 'gr', 'hr', 'sr', 'se'] },
+    { id: 'pink', name: 'Pink', sw: '#F28BA8', ids: ['rp', 'pk', 'cp', 'gp', 'sk', 'tk', 'td', 'tx', 'lp', 'rf', 'hk', 'ok', 'lt', 'dp', 'co', 'mg', 'hp', 'bp', 'sp'] },
+    { id: 'peach', name: 'Peach', sw: '#FFB38A', ids: ['to', 'pc', 'rn', 'rq', 'dc', 'dw', 'sh'] },
+    { id: 'orange', name: 'Orange', sw: '#FF8A3D', ids: ['po', 'go', 'tg', 'lo', 'mo'] },
+    { id: 'yellow', name: 'Yellow', sw: '#F7C948', ids: ['ry', 'ty', 'sf', 'gy', 'lj', 'ky', 'my', 'hy'] },
+    { id: 'white', name: 'White', sw: '#FFFDF8', ids: ['ri', 'dz', 'ly', 'bb', 'ow', 'tw', 'ts', 'pw', 'cw', 'rw', 'hw', 'pa', 'lu', 'ka', 'an', 'iw', 'mw', 'js', 'vl', 'sw'] },
+    { id: 'purple', name: 'Purple', sw: '#9B6BD3', ids: ['tp', 'lv', 'hl', 'op', 'rl', 'av', 'sl'] },
+    { id: 'blue', name: 'Blue', sw: '#6F8EDB', ids: ['hb', 'fm', 'rb', 'tl', 'lb', 'lx', 'ib', 'sb'] },
+    { id: 'dark', name: 'Deep', sw: '#4A1E3D', ids: ['tb', 'kb', 'cc'] },
+    { id: 'green', name: 'Green', sw: '#86A872', ids: ['eu', 'fn'] },
   ];
 
   // Flower families: one card in the catalog, with a colour dot for each member.
   const FAMILIES = [
-    ['rose', 'Rose'], ['tulip', 'Tulip'], ['lily', 'Lily'], ['lotus', 'Lotus'], ['peony', 'Peony'], ['calla', 'Calla Lily'],
+    ['rose', 'Rose'], ['sprayrose', 'Baby Roses'], ['tulip', 'Tulip'], ['lily', 'Lily'], ['lotus', 'Lotus'], ['peony', 'Peony'], ['calla', 'Calla Lily'],
     ['dahlia', 'Dahlia'], ['hydrangea', 'Hydrangea'], ['orchid', 'Orchid'], ['ranunculus', 'Ranunculus'], ['carnation', 'Carnation'],
     ['magnolia', 'Magnolia'], ['anemone', 'Anemone'], ['iris', 'Iris'], ['hibiscus', 'Hibiscus'], ['sunflower', 'Sunflower'],
     ['gerbera', 'Gerbera'], ['daisy', 'Daisy'], ['cosmos', 'Cosmos'], ['poppy', 'Poppy'], ['marigold', 'Marigold'],
@@ -102,6 +123,7 @@
   const SHADE = { sf: 'Golden', bb: 'White' };
   const FAMILY_ORDER = {
     rose: ['rr', 'rp', 'rq', 'ry', 'ri', 'rl', 'rb'],
+    sprayrose: ['sp', 'se', 'sh', 'sw', 'sl', 'sb'],
     tulip: ['tr', 'tk', 'to', 'tg', 'ty', 'tw', 'tp', 'tl', 'tb', 'ts', 'tx', 'td'],
     lily: ['ly', 'lp', 'lo', 'lj', 'lb'],
     gerbera: ['gr', 'gp', 'go', 'gy'],
@@ -110,14 +132,15 @@
 
   // Mood groups for the catalog filter (every flower is in exactly one).
   const MOODS = [
-    { id: 'romantic', name: 'Romantic', ids: ['rr', 'rp', 'pk', 'pc', 'cr', 'cp', 'rn', 'rq', 'tr', 'tk', 'td', 'lp', 'rf', 'hk', 'ok', 'lt', 'dp', 'cc', 'mg', 'hr', 'hp', 'gr', 'bp'] },
+    { id: 'romantic', name: 'Romantic', ids: ['rr', 'rp', 'pk', 'pc', 'cr', 'cp', 'rn', 'rq', 'tr', 'tk', 'td', 'lp', 'rf', 'hk', 'ok', 'lt', 'dp', 'cc', 'mg', 'hr', 'hp', 'gr', 'bp', 'sp', 'se', 'sh'] },
     { id: 'cheerful', name: 'Cheerful', ids: ['ry', 'ty', 'to', 'dz', 'sf', 'pr', 'po', 'go', 'gp', 'tg', 'ts', 'tx', 'lo', 'lj', 'gy', 'sr', 'ky', 'dc', 'co', 'mo', 'my', 'hy'] },
-    { id: 'calm', name: 'Calm', ids: ['lv', 'sk', 'hb', 'hl', 'fm', 'rb', 'tl', 'lb', 'lx', 'ib', 'av', 'js', 'vl'] },
-    { id: 'elegant', name: 'Elegant', ids: ['ri', 'tp', 'ly', 'op', 'ow', 'rl', 'tw', 'tb', 'pw', 'cw', 'rw', 'hw', 'pa', 'lu', 'ka', 'kb', 'dw', 'an', 'iw', 'mw'] },
+    { id: 'calm', name: 'Calm', ids: ['lv', 'sk', 'hb', 'hl', 'fm', 'rb', 'tl', 'lb', 'lx', 'ib', 'av', 'js', 'vl', 'sb', 'sl'] },
+    { id: 'elegant', name: 'Elegant', ids: ['ri', 'tp', 'ly', 'op', 'ow', 'rl', 'tw', 'tb', 'pw', 'cw', 'rw', 'hw', 'pa', 'lu', 'ka', 'kb', 'dw', 'an', 'iw', 'mw', 'sw'] },
     { id: 'green', name: 'Fillers', ids: ['bb', 'eu', 'fn'] },
   ];
   const BY_ID = Object.fromEntries(CATALOG.map(f => [f.id, f]));
   MOODS.forEach(m => m.ids.forEach(id => (BY_ID[id].mood = m.id)));
+  COLORS.forEach(c => c.ids.forEach(id => (BY_ID[id].color = c.id)));
   const FAM_BY_ID = Object.fromEntries(FAMILIES.map(f => [f.id, f]));
   CATALOG.forEach(f => {
     f.fam = FAM_OF_TYPE[f.type] || f.type;
@@ -470,6 +493,21 @@
       });
       return s;
     },
+    sprayrose(c) {
+      // four little roses and a bud on short branches, with two leaves
+      const mini = (x, y, k, r) => {
+        const petal = 'M0,0 C-17,-5 -17,-27 0,-27 C17,-27 17,-5 0,0Z';
+        let s = `<g transform="translate(${x},${y}) scale(${k}) rotate(${r})"><circle r="24" fill="${c.dark}"/>`;
+        for (let i = 0; i < 5; i++) s += `<path d="${petal}" fill="${c.base}" stroke="${c.dark}" stroke-width="1.4" ${rot(i * 72 + 10)}/>`;
+        s += `<circle r="13" fill="${c.base}" stroke="${c.dark}" stroke-width="1.4"/>`;
+        s += `<path d="M1,-1 C5,-5 -1,-9 -5,-5 C-9,-1 -4,6 2,5 C8,4 9,-3 6,-8" fill="none" stroke="${c.dark}" stroke-width="2" stroke-linecap="round"/>`;
+        return s + `<ellipse cx="-8" cy="-11" rx="6" ry="3" fill="${c.light}" opacity=".6" transform="rotate(-35 -8 -11)"/></g>`;
+      };
+      let s = `<path d="M0,12 C-2,2 -8,-4 -13,-6 M0,12 C1,0 6,-6 13,-8 M0,12 C0,0 0,-10 0,-16 M0,12 C3,6 9,2 14,4 M0,12 C-4,2 -16,-16 -18,-20" stroke="#5E8A4F" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
+      s += `<path d="M-2,6 C-12,2 -20,6 -22,12 C-14,14 -6,12 -2,6Z" fill="#86A872"/><path d="M2,8 C12,6 18,10 20,16 C12,17 5,14 2,8Z" fill="#7C9E68"/>`;
+      s += `<path d="M-18,-20 C-22,-26 -18,-32 -15,-33 C-12,-30 -13,-24 -18,-20Z" fill="${c.base}" stroke="${c.dark}" stroke-width=".8"/>`;
+      return s + mini(-13, -8, 0.4, -10) + mini(13, -9, 0.42, 20) + mini(14, 4, 0.32, 40) + mini(0, -18, 0.46, 5);
+    },
     fern(c) {
       let s = `<path d="M0,6 C1,-20 -1,-44 3,-64 C5,-70 1,-73 -2,-70" stroke="${c.dark}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
       for (let i = 0; i < 11; i++) {
@@ -484,7 +522,7 @@
   const TYPE_SCALE = { sunflower: 1.12, lily: 1.08, babysbreath: 1.05, peony: 1.12, hydrangea: 1.06, gerbera: 1.04, lotus: 1.1, dahlia: 1.1, magnolia: 1.04, hibiscus: 1.06, doubletulip: 1.06, parrot: 1.04 };
   const THUMB_VB = {
     lavender: '-30 -66 60 76', eucalyptus: '-30 -66 60 76', tulip: '-28 -36 56 52', sakura: '-30 -32 60 50',
-    babysbreath: '-26 -30 52 48', forgetmenot: '-24 -36 48 52', orchid: '-30 -34 60 60',
+    babysbreath: '-26 -30 52 48', sprayrose: '-30 -38 60 56', forgetmenot: '-24 -36 48 52', orchid: '-30 -34 60 60',
     parrot: '-28 -38 56 54', doubletulip: '-28 -34 56 50', lotus: '-36 -38 72 46', calla: '-24 -46 48 56',
     magnolia: '-30 -38 60 46', jasmine: '-26 -36 52 52', valley: '-24 -52 52 62', fern: '-30 -76 60 84',
   };
@@ -641,7 +679,7 @@
   }
 
   window.Flora = {
-    CATALOG, BY_ID, FAMILIES, FAM_BY_ID, MOODS, SIZES, MAX_STEMS, WRAPS, RIBBONS, HEADS, VIEWBOX,
+    CATALOG, BY_ID, FAMILIES, FAM_BY_ID, MOODS, COLORS, SIZES, G, MAX_STEMS, WRAPS, RIBBONS, HEADS, VIEWBOX,
     headThumb, layout, drawOrder, stemMarkup, applyPos, bouquetSVG, skeleton, setSize, recolor,
   };
 })();

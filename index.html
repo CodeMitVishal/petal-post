@@ -15,8 +15,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=19">
-  <link rel="stylesheet" href="css/motion.css?v=19">
+  <link rel="stylesheet" href="css/styles.css?v=20">
+  <link rel="stylesheet" href="css/motion.css?v=20">
 </head>
 <body>
   <canvas id="petals" aria-hidden="true"></canvas>
@@ -28,7 +28,7 @@
       <span>Petal Post</span>
     </a>
     <nav class="topnav">
-      <a href="#/wall" class="nav-link" id="wallNav" aria-label="Flower wall" hidden><span class="live-dot" aria-hidden="true"></span><span class="nl-text">Flower wall</span></a>
+      <a href="#/wall" class="nav-link" id="wallNav" aria-label="Flower wall" hidden><span class="live-dot" aria-hidden="true"></span><span class="nl-text">Flower wall</span><span class="nl-short" aria-hidden="true">Wall</span></a>
       <a href="#/create" class="btn btn-small" data-new>Send flowers</a>
     </nav>
   </header>
@@ -134,7 +134,18 @@
             </div>
             <div class="gift-tag" id="previewTag" aria-hidden="true"><span>To</span> <strong id="tagName">someone special</strong></div>
             <div class="preview-photo" id="previewPhoto" hidden><img alt="Your photo for the note"></div>
+            <div class="stem-pop" id="stemPop" role="dialog" aria-label="Edit this flower" hidden>
+              <div class="sp-head"><span class="sp-thumb"></span><div class="sp-name"><strong></strong><small></small></div><button class="sp-x" type="button" aria-label="Close">×</button></div>
+              <div class="sp-dots" role="radiogroup" aria-label="Colour of this flower"></div>
+              <div class="sp-actions">
+                <button type="button" data-act="left" aria-label="Move left">‹</button>
+                <button type="button" data-act="right" aria-label="Move right">›</button>
+                <button type="button" data-act="dup">+ One more</button>
+                <button type="button" data-act="del" class="sp-del">Remove</button>
+              </div>
+            </div>
           </div>
+          <p class="edit-tip" id="editTip" hidden>Tap a flower to recolour or remove it. Drag it to swap places (on a phone, press and hold first).</p>
           <div class="preview-tools">
             <span class="stem-status"><span id="stemCount" aria-live="polite">0 stems</span><span class="stem-meter" id="stemMeter" aria-hidden="true"><i></i></span></span>
             <button class="chip-btn" id="shuffleBtn" type="button">
@@ -173,13 +184,20 @@
                 <button class="chip-btn" id="presetBtn" type="button" hidden></button>
                 <button class="chip-btn subtle" id="clearBtn" type="button">Clear</button>
               </div>
-              <label class="flower-search">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
-                <input id="flowerSearch" type="search" placeholder="Search flowers, colours or feelings" aria-label="Search flowers" autocomplete="off" spellcheck="false">
-              </label>
-              <div class="mood-filter" id="moodFilter" role="toolbar" aria-label="Filter flowers by mood"></div>
+              <div class="filter-bar" id="filterBar">
+                <label class="flower-search">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+                  <input id="flowerSearch" type="search" enterkeyhint="search" placeholder="Search: pink rose, lotus, love…" aria-label="Search flowers" autocomplete="off" spellcheck="false">
+                </label>
+                <p class="filter-label" id="colorLabel">Colour</p>
+                <div class="color-filter" id="colorFilter" role="group" aria-labelledby="colorLabel"></div>
+                <p class="filter-label" id="moodLabel">Mood</p>
+                <div class="mood-filter" id="moodFilter" role="group" aria-labelledby="moodLabel"></div>
+                <div class="applied" id="appliedFilters" aria-live="polite"></div>
+              </div>
               <div class="catalog" id="catalog"></div>
-              <p class="catalog-empty" id="catalogEmpty" hidden></p>
+              <div class="catalog-empty" id="catalogEmpty" hidden></div>
+              <button class="filter-jump" id="filterJump" type="button" aria-label="Back to filters"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Filters<b></b></button>
             </div>
 
             <div class="step" data-step="2">
@@ -198,8 +216,8 @@
             <div class="step" data-step="3">
               <h2>Write your note</h2>
               <div class="field-row">
-                <label class="field"><span>To</span><input id="toInput" maxlength="40" autocomplete="off" placeholder="Their name"></label>
-                <label class="field"><span>From</span><input id="fromInput" maxlength="40" autocomplete="off" placeholder="Your name"></label>
+                <label class="field" id="toField"><span>To <em class="req" aria-hidden="true">*</em></span><input id="toInput" maxlength="40" autocomplete="off" autocapitalize="words" enterkeyhint="next" placeholder="Their name" required aria-required="true" aria-describedby="toErr"><small class="field-err" id="toErr" hidden>Add their name so the envelope says who it's for.</small></label>
+                <label class="field" id="fromField"><span>From <em class="req" aria-hidden="true">*</em></span><input id="fromInput" maxlength="40" autocomplete="given-name" autocapitalize="words" enterkeyhint="next" placeholder="Your name" required aria-required="true" aria-describedby="fromErr"><small class="field-err" id="fromErr" hidden>Add your name so they know who it's from.</small></label>
               </div>
               <label class="field">
                 <span>Your note</span>
@@ -289,6 +307,7 @@
                   Preview as them
                 </button>
               </div>
+              <a href="#/wall" class="wall-peek" id="wallPeek" hidden><span class="live-dot" aria-hidden="true"></span>See who else is sending flowers on the flower wall →</a>
               <p class="hint small">Your note is stored only inside this link. Anyone who has the link can open it.</p>
             </div>
           </div>
@@ -375,9 +394,9 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/config.js?v=19"></script>
-  <script src="js/flowers.js?v=19"></script>
-  <script src="js/app.js?v=19"></script>
-  <script src="js/motion.js?v=19"></script>
+  <script src="js/config.js?v=20"></script>
+  <script src="js/flowers.js?v=20"></script>
+  <script src="js/app.js?v=20"></script>
+  <script src="js/motion.js?v=20"></script>
 </body>
 </html>

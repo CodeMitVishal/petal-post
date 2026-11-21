@@ -232,6 +232,18 @@
     };
   });
 
+  // Two flowers swapped places in the bouquet: a little sparkle where they met.
+  on('stems-swapped', ({ from }) => {
+    const b = from && from.querySelector('.bloom');
+    if (!b) return;
+    const c = center(b);
+    for (let i = 0; i < 6; i++) {
+      const s = spawn('spark', c.x, c.y, '✦');
+      s.style.setProperty('--a', i * 60 + rand(-15, 15) + 'deg');
+      autoRemove(s);
+    }
+  });
+
   // Picking a colour on a flower card sends a little ring of petals in that colour.
   on('shade-picked', ({ from, color }) => {
     if (!from) return;
