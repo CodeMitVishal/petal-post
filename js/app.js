@@ -567,6 +567,7 @@
     s.moods = ok(d.moods || (d.mood && d.mood !== 'all' ? [d.mood] : []), F.MOODS); // older drafts kept a single mood
     if (d.sel && typeof d.sel === 'object') Object.entries(d.sel).forEach(([fam, id]) => { if (F.FAM_BY_ID[fam] && F.BY_ID[id] && F.BY_ID[id].fam === fam) s.sel[fam] = id; });
     s.ps = Photos.valid(d.ps) ? d.ps : ''; s.pr = Photos.valid(d.pr) ? d.pr : ''; s.step = Math.min(4, Math.max(0, d.step | 0));
+    if (s.step === 4 && !(s.t.trim() && s.f.trim())) s.step = 3; // a draft never reopens on Send without both names
     return s;
   }
   function save() {
@@ -1129,13 +1130,18 @@
   }
 
   function goStep(n) {
-    if (n === 4 && state.items.length && !namesOk()) {
-      // send needs both names: go to the note step and point at what's missing
+    if (n === 4 && !namesOk()) {
+      // send always needs both names: go to the note step and point at what's missing
       if (state.step !== 3) { state.step = 3; save(); renderSteps(true); }
       const first = showNameErrors(true);
       toast('Add both names to send your flowers.');
       setTimeout(() => first && first.focus(), reduced() ? 0 : 320);
       return;
+    }
+    if (n === 4 && !state.items.length) {
+      // ...and at least one flower
+      toast('Add at least one flower to your bouquet first.');
+      n = 1;
     }
     const prev = state.step;
     state.step = n;
