@@ -1177,7 +1177,7 @@
       const show = fits.length > 0;
       // colours outside the mood or search step back; the card shows the first colour that fits
       card.querySelectorAll('.dot').forEach(d => d.classList.toggle('dim', !fits.includes(d.dataset.id)));
-      if (show && !fits.includes(selOf(fam))) pickShade(fam, fits[0], false);
+      if (animate && show && !fits.includes(selOf(fam))) pickShade(fam, fits[0], false); // only when the filter itself changes
       const was = !card.hidden;
       card.hidden = !show;
       if (show) shown++;
