@@ -6,7 +6,7 @@
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sleep = ms => new Promise(r => setTimeout(r, reduced() ? 0 : ms));
-  const MAX_ALL = F.MAX_STEMS; // the Grand size's limit; each size has its own (F.SIZES)
+  const MAX_ALL = F.MAX_STEMS; // the Lavish size's limit; each size has its own (F.SIZES)
   const sizeOf = z => F.SIZES[z] || F.SIZES.m;
   const emit = (name, detail = {}) => document.dispatchEvent(new CustomEvent('pp:' + name, { detail }));
 
@@ -438,12 +438,13 @@
   })();
 
   /* ================= HOME ================= */
-  // "Grow another" cycles through sizes so visitors see a Posy, a Classic and a Grand.
+  // "Grow another" cycles through sizes so visitors see a Posy, a Classic, a Grand and a Lavish.
   const HERO_SETS = [
     { z: 'm', ids: ['rp', 'rr', 'sk', 'dz', 'pk', 'lv', 'bb', 'ty', 'rp'] },
     { z: 'l', ids: ['pk', 'rr', 'hb', 'ri', 'op', 'cr', 'lv', 'rn', 'bb', 'pk', 'eu', 'rp', 'hl', 'ly', 'rr', 'cp', 'fm', 'eu'] },
     { z: 's', ids: ['rn', 'pk', 'bb', 'cp', 'fm', 'rn'] },
     { z: 'm', ids: ['sf', 'go', 'ty', 'gp', 'po', 'dz', 'sf', 'eu'] },
+    { z: 'x', ids: ['tr', 'tk', 'pk', 'lt', 'rr', 'td', 'hk', 'rp', 'lp', 'tw', 'bb', 'tr', 'dp', 'mg', 'rq', 'tk', 'fn', 'pk', 'tx', 'rr', 'bp', 'lt', 'rp', 'eu', 'tk', 'ri', 'td', 'bb'] },
     { z: 'l', ids: ['ly', 'ow', 'ri', 'hb', 'bb', 'ly', 'eu', 'ri', 'hl', 'op', 'bb', 'ow', 'lv', 'ri'] },
   ];
   let heroIdx = 0;
@@ -604,7 +605,7 @@
     const svg = $('#builderSvg');
     svg.innerHTML = F.skeleton(state.w, state.r, state.z);
 
-    // bouquet size: Posy (short), Classic, Grand (tall)
+    // bouquet size: Posy (short), Classic, Grand (tall), Lavish (tallest)
     const sp = $('#sizePick');
     Object.values(F.SIZES).forEach(Z => {
       const b = document.createElement('button');
@@ -612,7 +613,7 @@
       b.className = 'size-opt';
       b.dataset.size = Z.id;
       b.setAttribute('role', 'radio');
-      b.innerHTML = `${sizeIcon(Z.id)}<span><strong>${Z.name}</strong><small>${{ s: 'Short & sweet', m: 'Just right', l: 'Big & lush' }[Z.id]} · up to ${Z.max}</small></span>`;
+      b.innerHTML = `${sizeIcon(Z.id)}<span><strong>${Z.name}</strong><small>${{ s: 'Short & sweet', m: 'Just right', l: 'Big & lush', x: 'A showstopper' }[Z.id]} · up to ${Z.max}</small></span>`;
       b.addEventListener('click', () => chooseSize(Z.id, b));
       sp.appendChild(b);
     });
@@ -706,9 +707,9 @@
       // a harmonious surprise: flowers from one mood, finished with a filler
       const moods = F.MOODS.filter(m => m.id !== 'green');
       const mood = moods[(Math.random() * moods.length) | 0];
-      const [lo, hi] = { s: [4, 7], m: [6, 11], l: [12, 22] }[state.z] || [6, 11];
+      const [lo, hi] = { s: [4, 7], m: [6, 11], l: [12, 22], x: [24, 34] }[state.z] || [6, 11];
       const n = lo + ((Math.random() * (hi - lo + 1)) | 0);
-      const pick = [...mood.ids].sort(() => Math.random() - 0.5).slice(0, (state.z === 'l' ? 5 : 3) + ((Math.random() * 2) | 0));
+      const pick = [...mood.ids].sort(() => Math.random() - 0.5).slice(0, ({ l: 5, x: 7 }[state.z] || 3) + ((Math.random() * 2) | 0));
       const filler = ['bb', 'eu', 'fn', 'bp', 'js'][(Math.random() * 5) | 0];
       state.aside = [];
       state.items = Array.from({ length: n - 1 }, () => newItem(pick[(Math.random() * pick.length) | 0])).concat(newItem(filler));
@@ -858,8 +859,8 @@
 
   function addFlower(id, card) {
     if (state.items.length >= maxStems()) {
-      const bigger = state.z === 's' ? 'Classic' : state.z === 'm' ? 'Grand' : '';
-      toast(bigger ? `A ${sizeOf(state.z).name} holds ${maxStems()} stems. Switch to ${bigger} for more room.` : `A Grand bouquet holds up to ${maxStems()} stems.`);
+      const bigger = { s: 'Classic', m: 'Grand', l: 'Lavish' }[state.z] || '';
+      toast(bigger ? `A ${sizeOf(state.z).name} holds ${maxStems()} stems. Switch to ${bigger} for more room.` : `A ${sizeOf(state.z).name} bouquet holds up to ${maxStems()} stems.`);
       const sp = $('#sizePick');
       if (bigger && sp) { sp.classList.remove('nudge'); void sp.offsetWidth; sp.classList.add('nudge'); }
       return;
@@ -1122,7 +1123,7 @@
 
   // Small icon for each size: a cone with 3, 5 or 7 blooms on longer and longer stems.
   function sizeIcon(z) {
-    const c = { s: { r: 8, n: 3, top: 25 }, m: { r: 12, n: 5, top: 15 }, l: { r: 16, n: 7, top: 5 } }[z];
+    const c = { s: { r: 8, n: 3, top: 25 }, m: { r: 12, n: 5, top: 15 }, l: { r: 16, n: 7, top: 5 }, x: { r: 20, n: 9, top: -2 } }[z];
     let stems = '', dots = '';
     for (let i = 0; i < c.n; i++) {
       const t = c.n === 1 ? 0 : (i / (c.n - 1)) * 2 - 1, x = 24 + t * c.r, y = c.top + 6 + t * t * 6;

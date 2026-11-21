@@ -701,7 +701,7 @@ p { margin: 0; }
 /* ---------- bouquet sizes ---------- */
 .scale-group { transition: transform .8s var(--spring); }
 .size-label { margin: 2px 0 8px; }
-.size-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+.size-pick { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
 .size-opt {
   display: flex; align-items: center; gap: 10px; text-align: left; padding: 10px 12px; border-radius: 16px; cursor: pointer;
   border: 1.5px solid var(--line); background: var(--bg); transition: border-color .2s, background .2s, transform .3s var(--spring), box-shadow .3s;
@@ -746,7 +746,7 @@ p { margin: 0; }
 @keyframes flowerIn { from { opacity: 0; transform: translateY(10px) scale(.94); } }
 
 @media (max-width: 600px) {
-  .size-pick { gap: 6px; }
+  .size-pick { grid-template-columns: repeat(4, 1fr); gap: 6px; }
   .size-opt { flex-direction: column; text-align: center; gap: 4px; padding: 10px 6px; }
   .size-opt small { font-size: .68rem; }
   .size-ico { width: 32px; height: 38px; }

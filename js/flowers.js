@@ -129,7 +129,7 @@
   // colour order on the cards: warm to cool, specials last
   Object.entries(FAMILY_ORDER).forEach(([fam, order]) => FAM_BY_ID[fam].ids.sort((a, b) => order.indexOf(a) - order.indexOf(b)));
 
-  // Bouquet sizes: Posy is short and compact, Grand is tall with a third row.
+  // Bouquet sizes: Posy is short and compact, Grand is tall with a third row, Lavish adds a fourth.
   const SIZES = {
     s: { id: 's', name: 'Posy', max: 7, wrap: 0.8, dome: 24, step: 7, single: 168,
          rows: [{ R: 176, max: 26, s: 1.18 }, { R: 140, max: 20, s: 1.1 }] },
@@ -137,8 +137,10 @@
          rows: [{ R: 256, max: 34, s: 1.32 }, { R: 196, max: 28, s: 1.2 }] },
     l: { id: 'l', name: 'Grand', max: 24, wrap: 1.14, dome: 44, step: 6.5, single: 270,
          rows: [{ R: 300, max: 36, s: 1.28 }, { R: 248, max: 33, s: 1.22 }, { R: 196, max: 28, s: 1.14 }] },
+    x: { id: 'x', name: 'Lavish', max: 36, wrap: 1.2, dome: 48, step: 6, single: 270,
+         rows: [{ R: 296, max: 44, s: 1.15 }, { R: 256, max: 40, s: 1.11 }, { R: 216, max: 35, s: 1.06 }, { R: 178, max: 28, s: 1.02 }] },
   };
-  const MAX_STEMS = 24;
+  const MAX_STEMS = 36; // keep in step with the stems check in supabase/schema.sql
 
   const WRAPS = {
     kraft: { name: 'Kraft', base: '#D3A877', dark: '#B4865A', light: '#EBD3B4' },
@@ -506,12 +508,12 @@
   }
 
   // Stems are dealt round-robin into rows (tallest first); heads sit on a dome.
-  // Posy and Classic use two rows, Grand uses three once it has more than 8 stems.
+  // Small bouquets use fewer rows: one up to 3 stems, two up to 8, three up to 16, then all of them.
   function layout(ids, seed, size) {
     const Z = SIZES[size] || SIZES.m;
     const n = ids.length, out = new Array(n), r = rng(seed || 1);
     const all = ids.map((_, i) => i);
-    const k = n <= 3 ? 1 : Z.rows.length === 3 && n <= 8 ? 2 : Z.rows.length;
+    const k = Math.min(Z.rows.length, n <= 3 ? 1 : n <= 8 ? 2 : n <= 16 ? 3 : 4);
     const rows = Array.from({ length: k }, (_, row) => all.filter(i => i % k === row));
     rows.forEach((idxs, row) => {
       const m = idxs.length, c = k === 1 ? { ...Z.rows[0], R: Z.single } : Z.rows[row];

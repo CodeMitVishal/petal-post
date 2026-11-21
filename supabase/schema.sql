@@ -15,8 +15,8 @@ create table if not exists public.gifts (
   sender     text not null check (sender    ~ '^[[:alpha:]][[:alpha:] .''-]{0,19}$'),
   recipient  text not null check (recipient ~ '^[[:alpha:]][[:alpha:] .''-]{0,19}$'),
   occasion   text check (occasion is null or occasion in ('love','birthday','thanks','sorry','getwell','congrats','sympathy','just')),
-  stems      smallint not null check (stems between 1 and 24),
-  flowers    text not null check (flowers ~ '^[a-z]{2}(\.[a-z]{2}){0,23}$')
+  stems      smallint not null check (stems between 1 and 36),
+  flowers    text not null check (flowers ~ '^[a-z]{2}(\.[a-z]{2}){0,35}$')
 );
 alter table public.gifts add column if not exists sender_photo    uuid;
 alter table public.gifts add column if not exists recipient_photo uuid;
@@ -25,11 +25,11 @@ alter table public.gifts add column if not exists ip_hash         text;
 -- on the wall, and gives each browser its own rate limit (not shared with the whole Wi-Fi).
 alter table public.gifts add column if not exists sender_key      uuid;
 
--- Grand bouquets hold up to 24 stems (re-applied so older projects upgrade in place).
+-- Lavish bouquets hold up to 36 stems (re-applied so older projects upgrade in place).
 alter table public.gifts drop constraint if exists gifts_stems_check;
-alter table public.gifts add constraint gifts_stems_check check (stems between 1 and 24);
+alter table public.gifts add constraint gifts_stems_check check (stems between 1 and 36);
 alter table public.gifts drop constraint if exists gifts_flowers_check;
-alter table public.gifts add constraint gifts_flowers_check check (flowers ~ '^[a-z]{2}(\.[a-z]{2}){0,23}$');
+alter table public.gifts add constraint gifts_flowers_check check (flowers ~ '^[a-z]{2}(\.[a-z]{2}){0,35}$');
 
 create index if not exists gifts_pair_idx    on public.gifts (lower(sender), lower(recipient));
 create index if not exists gifts_created_idx on public.gifts (created_at desc);
