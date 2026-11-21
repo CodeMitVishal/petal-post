@@ -616,7 +616,9 @@
       b.className = 'size-opt';
       b.dataset.size = Z.id;
       b.setAttribute('role', 'radio');
-      b.innerHTML = `${sizeIcon(Z.id)}<span><strong>${Z.name}</strong><small><span class="sz-sub">${{ s: 'Short & sweet', m: 'Just right', l: 'Big & lush', x: 'A showstopper' }[Z.id]} · </span>up to ${Z.max}</small></span>`;
+      b.innerHTML = `<strong>${Z.name}</strong><small>${Z.max}</small>`;
+      b.title = `${Z.name}: ${{ s: 'short & sweet', m: 'just right', l: 'big & lush', x: 'a showstopper' }[Z.id]}, up to ${Z.max} stems`;
+      b.setAttribute('aria-label', `${Z.name}, up to ${Z.max} stems`);
       b.addEventListener('click', () => chooseSize(Z.id, b));
       sp.appendChild(b);
     });
@@ -639,19 +641,18 @@
       b.className = 'color-chip';
       b.dataset.color = c.id;
       b.title = `${c.name} flowers (${c.ids.length})`;
-      b.innerHTML = `<i style="--sw:${c.sw}"></i><span></span>`;
-      b.querySelector('span').textContent = c.name;
+      b.innerHTML = `<i style="--sw:${c.sw}"></i>`;
+      b.setAttribute('aria-label', `${c.name} flowers`);
       b.addEventListener('click', () => { state.colors = toggle(state.colors, c.id); save(); renderFilters(true); });
       cf.appendChild(b);
     });
     const mf = $('#moodFilter');
-    [{ id: 'all', name: 'Any mood', ids: F.CATALOG.map(f => f.id) }, ...F.MOODS].forEach(m => {
+    F.MOODS.forEach(m => {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'mood-chip';
       b.dataset.mood = m.id;
-      b.innerHTML = `<span></span><b>${m.ids.length}</b>`;
-      b.firstChild.textContent = m.name;
+      b.textContent = m.name;
       b.addEventListener('click', () => { state.moods = m.id === 'all' ? [] : toggle(state.moods, m.id); save(); renderFilters(true); });
       mf.appendChild(b);
     });
@@ -1174,7 +1175,11 @@
     });
     F.recolor(svg, state.w, state.r);
     $('#emptyHint').classList.toggle('gone', list.length > 0);
-    $('#editTip').hidden = list.length < 2;
+    $('#editTip').hidden = true;
+    if (list.length >= 2 && !store.get('petalpost.tipSeen')) {
+      store.set('petalpost.tipSeen', 1);
+      setTimeout(() => toast('Tip: tap any flower in your bouquet to recolour, move or remove it.'), 900);
+    }
     $('#navMiniCount').textContent = `${list.length}/${maxStems()}`;
     clearTimeout(miniTimer);
     miniTimer = setTimeout(() => ($('#navMini svg').innerHTML = list.length ? F.bouquetSVG(list.map(i => i.id), { size: state.z, w: state.w, r: state.r, seed: state.s }) : ''), 120);
@@ -1412,7 +1417,7 @@
       b.setAttribute('aria-checked', on);
       b.tabIndex = on ? 0 : -1;
     });
-    $('#flowersHint').textContent = `Pick a colour, then tap a flower to add it. Up to ${maxStems()} stems for a ${sizeOf(state.z).name}.`;
+    $('#flowersHint').textContent = 'Choose a colour, then tap a flower to add it.';
   }
 
   // Colour, mood and search narrow the catalog together. Within a filter you can pick several
@@ -1443,6 +1448,7 @@
     // the summary line and a removable chip for every filter in use
     const box = $('#appliedFilters');
     box.innerHTML = '';
+    box.hidden = !filtersOn();
     const count = document.createElement('span');
     count.className = 'applied-count';
     count.textContent = filtersOn() ? `${flowers} ${flowers === 1 ? 'flower' : 'flowers'} in ${kinds} ${kinds === 1 ? 'kind' : 'kinds'}` : `All ${F.CATALOG.length} flowers in ${F.FAMILIES.length} kinds`;
@@ -1594,15 +1600,25 @@
 
     // meanings
     const ml = $('#meaningList');
-    ml.innerHTML = '<p class="sr-only">What these flowers mean:</p>';
-    [...new Set(gift.b)].forEach((id, i) => {
+    ml.innerHTML = '<p class="meaning-title">What your flowers mean</p>';
+    const kinds = [...new Set(gift.b)], FIRST = 4; // a few at a glance, the rest on request
+    kinds.forEach((id, i) => {
       const f = F.BY_ID[id];
       const el = document.createElement('div');
       el.className = 'm-item';
-      el.style.animationDelay = `${i * 0.08}s`;
+      el.style.animationDelay = `${Math.min(i, FIRST) * 0.08}s`;
+      el.hidden = i >= FIRST;
       el.innerHTML = `${F.headThumb(id)}<div><strong>${f.name}</strong><small>${f.meaning}</small></div>`;
       ml.appendChild(el);
     });
+    if (kinds.length > FIRST) {
+      const more = document.createElement('button');
+      more.type = 'button';
+      more.className = 'meaning-more';
+      more.textContent = `Show all ${kinds.length}`;
+      more.addEventListener('click', () => { ml.querySelectorAll('.m-item[hidden]').forEach(el => (el.hidden = false)); more.remove(); });
+      ml.appendChild(more);
+    }
 
     setTimeout(() => { if (my === typeToken) emit('bloomed', { art: $('.reveal-art') }); }, Math.min(growTime, 2.6) * 1000);
     await sleep(Math.min(growTime, 2.2) * 1000 + 600);

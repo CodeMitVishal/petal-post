@@ -15,8 +15,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=22">
-  <link rel="stylesheet" href="css/motion.css?v=22">
+  <link rel="stylesheet" href="css/styles.css?v=23">
+  <link rel="stylesheet" href="css/motion.css?v=23">
 </head>
 <body>
   <canvas id="petals" aria-hidden="true"></canvas>
@@ -40,7 +40,7 @@
         <div class="hero-copy">
           <p class="eyebrow" data-reveal>Digital bouquets, delivered by link</p>
           <h1 data-reveal>Send flowers that <em>never wilt.</em></h1>
-          <p class="lede" data-reveal>Pick the blooms, wrap them up and write a note. Then share one link. Your person opens an envelope and watches their bouquet grow, stem by stem.</p>
+          <p class="lede" data-reveal>Build a bouquet, write a note and share one link. They open an envelope and watch it bloom, stem by stem.</p>
           <div class="cta-row" data-reveal>
             <a href="#/create" class="btn btn-primary" data-new>
               Create a bouquet
@@ -49,7 +49,7 @@
             <button class="btn btn-ghost" id="sampleBtn" type="button">Open a sample gift</button>
           </div>
           <ul class="trust" data-reveal>
-            <li>Free</li><li>No sign-up</li><li>Works on any phone</li><li>Your note never leaves the link</li>
+            <li>Free</li><li>No sign-up</li><li>Works on any phone</li>
           </ul>
         </div>
         <div class="hero-art" data-reveal>
@@ -71,16 +71,16 @@
           <h2 id="how-h">How it works</h2>
         </div>
         <ol class="how">
-          <li data-reveal><span class="num">1</span><h3>Build your bouquet</h3><p>Pick from 87 flowers in every colour, from a little posy to 36 lavish stems. Each one shows what it means, so your bouquet says what you mean too.</p></li>
-          <li data-reveal><span class="num">2</span><h3>Write from the heart</h3><p>Add their name and a short note. Stuck? Tap “Inspire me”. You can also set a date so it opens on the day.</p></li>
-          <li data-reveal><span class="num">3</span><h3>Share one link</h3><p>Send it on WhatsApp, by email or anywhere else. They open the envelope and the flowers grow on their screen.</p></li>
+          <li data-reveal><span class="num">1</span><h3>Build your bouquet</h3><p>87 flowers in every colour, from a little posy to 36 stems. Each one has a meaning.</p></li>
+          <li data-reveal><span class="num">2</span><h3>Write from the heart</h3><p>Add their name and a few words. Stuck? Tap “Inspire me”.</p></li>
+          <li data-reveal><span class="num">3</span><h3>Share one link</h3><p>Send it on WhatsApp or anywhere. The flowers grow on their screen.</p></li>
         </ol>
       </section>
 
       <section class="wrap block" aria-labelledby="occ-h">
         <div class="block-head" data-reveal>
           <h2 id="occ-h">What are you celebrating?</h2>
-          <p>Start from an occasion. You get a suggested bouquet and a note, and you can change both.</p>
+          <p>Pick one for a ready-made bouquet and note. Change anything you like.</p>
         </div>
         <div class="occasion-grid" id="homeOccasions"></div>
       </section>
@@ -107,10 +107,10 @@
       <section class="wrap block" aria-labelledby="touch-h">
         <div class="block-head" data-reveal><h2 id="touch-h">Little touches</h2></div>
         <div class="features">
-          <article data-reveal><h3>Surprise date</h3><p>Send it today and choose the day it opens. Until then they see a sealed envelope with a countdown.</p></article>
-          <article data-reveal><h3>Send one back</h3><p>Recipients can answer with a bouquet of their own in one tap, with the names already filled in.</p></article>
-          <article data-reveal><h3>Keepsake image</h3><p>Save the bouquet and note as an image to keep, print or post.</p></article>
-          <article data-reveal><h3>Private by design</h3><p>Your note lives only inside the link. Nothing goes on the public wall unless you tick the box, and then only first names and flowers.</p></article>
+          <article data-reveal><h3>Surprise date</h3><p>Choose the day it opens. Until then: a sealed envelope and a countdown.</p></article>
+          <article data-reveal><h3>Send one back</h3><p>They can answer with flowers of their own in one tap.</p></article>
+          <article data-reveal><h3>Keepsake image</h3><p>Save the bouquet and note as a picture to keep.</p></article>
+          <article data-reveal><h3>Private by design</h3><p>Your note lives only inside the link, never on a server.</p></article>
         </div>
       </section>
 
@@ -164,7 +164,7 @@
             <li><button type="button" data-goto="3"><i>4</i><span>Note</span></button></li>
             <li><button type="button" data-goto="4"><i>5</i><span>Send</span></button></li>
           </ol>
-          <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+          <div class="progress" aria-hidden="true" hidden><span id="progressBar"></span></div>
 
           <div class="steps">
             <div class="step" data-step="0">
@@ -174,27 +174,29 @@
             </div>
 
             <div class="step" data-step="1">
-              <h2>Pick your flowers</h2>
-              <p class="field-label size-label" id="sizeLabel">Bouquet size</p>
-              <div class="size-pick" id="sizePick" role="radiogroup" aria-labelledby="sizeLabel"></div>
-              <p class="hint" id="flowersHint">Tap to add flowers. Hover or focus a flower to see its meaning.</p>
-              <div class="chosen" id="chosen" aria-live="polite"></div>
-              <button class="chosen-more" id="chosenMore" type="button" aria-controls="chosen" hidden></button>
-              <div class="row-actions">
-                <button class="chip-btn" id="surpriseBtn" type="button">✦ Surprise me</button>
-                <button class="chip-btn" id="presetBtn" type="button" hidden></button>
-                <button class="chip-btn subtle" id="clearBtn" type="button">Clear</button>
+              <div class="step-head">
+                <h2>Pick your flowers</h2>
+                <div class="head-actions">
+                  <button class="text-btn" id="surpriseBtn" type="button">✦ Surprise me</button>
+                  <button class="text-btn" id="presetBtn" type="button" hidden></button>
+                  <button class="text-btn subtle" id="clearBtn" type="button">Clear</button>
+                </div>
               </div>
+              <div class="size-pick" id="sizePick" role="radiogroup" aria-label="Bouquet size"></div>
+              <p class="hint small-hint" id="flowersHint">Choose a colour, then tap a flower to add it.</p>
+              <div class="chosen" id="chosen" aria-live="polite" hidden></div>
+              <button class="chosen-more" id="chosenMore" type="button" aria-controls="chosen" hidden></button>
               <div class="filter-bar" id="filterBar">
                 <label class="flower-search">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
-                  <input id="flowerSearch" type="search" enterkeyhint="search" placeholder="Search: pink rose, lotus, love…" aria-label="Search flowers" autocomplete="off" spellcheck="false">
+                  <input id="flowerSearch" type="search" enterkeyhint="search" placeholder="Search flowers, colours, feelings" aria-label="Search flowers" autocomplete="off" spellcheck="false">
                 </label>
-                <p class="filter-label" id="colorLabel">Colour</p>
-                <div class="color-filter" id="colorFilter" role="group" aria-labelledby="colorLabel"></div>
-                <p class="filter-label" id="moodLabel">Mood</p>
-                <div class="mood-filter" id="moodFilter" role="group" aria-labelledby="moodLabel"></div>
-                <div class="applied" id="appliedFilters" aria-live="polite"></div>
+                <div class="filter-row">
+                  <div class="color-filter" id="colorFilter" role="group" aria-label="Filter by colour"></div>
+                  <span class="filter-sep" aria-hidden="true"></span>
+                  <div class="mood-filter" id="moodFilter" role="group" aria-label="Filter by mood"></div>
+                </div>
+                <div class="applied" id="appliedFilters" aria-live="polite" hidden></div>
               </div>
               <div class="catalog" id="catalog"></div>
               <div class="catalog-empty" id="catalogEmpty" hidden></div>
@@ -402,9 +404,9 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/config.js?v=22"></script>
-  <script src="js/flowers.js?v=22"></script>
-  <script src="js/app.js?v=22"></script>
-  <script src="js/motion.js?v=22"></script>
+  <script src="js/config.js?v=23"></script>
+  <script src="js/flowers.js?v=23"></script>
+  <script src="js/app.js?v=23"></script>
+  <script src="js/motion.js?v=23"></script>
 </body>
 </html>

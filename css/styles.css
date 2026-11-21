@@ -882,3 +882,64 @@ p { margin: 0; }
 .sp-actions .sp-del:hover { background: var(--rose); color: #fff; }
 @media (max-width: 380px) { .sp-actions button { font-size: .78rem; padding: 0 8px; } .sp-name small { display: none; } }
 @media (max-width: 600px) { .meaning-list .m-item small { line-height: 1.35; display: block; margin-top: 2px; } }
+
+/* ================= calmer flower step (less on screen at once) ================= */
+.step-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px 14px; flex-wrap: wrap; margin-bottom: 14px; }
+.step-head h2 { margin: 0; }
+.head-actions { display: flex; gap: 2px; }
+.text-btn { border: 0; background: none; padding: 6px 8px; border-radius: 10px; font: inherit; font-size: .88rem; font-weight: 600; color: var(--rose-deep); cursor: pointer; transition: background .2s; }
+.text-btn:hover { background: var(--blush-2); }
+.text-btn.subtle { color: var(--muted); font-weight: 500; }
+.text-btn[hidden] { display: none; }
+
+/* size: one slim segmented control */
+.size-pick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; padding: 4px; margin-bottom: 8px; border-radius: 14px; background: var(--bg); border: 1px solid var(--line); }
+.size-opt { display: flex; align-items: baseline; justify-content: center; gap: 6px; padding: 9px 4px; border: 0; border-radius: 10px; background: none; box-shadow: none; text-align: center; }
+.size-opt:hover { transform: none; background: rgba(255,255,255,.6); }
+.size-opt strong { display: inline; font-size: .9rem; }
+.size-opt small { display: inline; font-size: .75rem; color: var(--muted); }
+.size-opt[aria-checked="true"] { background: var(--paper); border: 0; box-shadow: 0 2px 8px -3px rgba(80,25,40,.3); }
+.size-opt[aria-checked="true"] strong { color: var(--rose-deep); }
+.small-hint { font-size: .84rem; margin: 0 2px 16px; }
+
+/* filters: search plus one quiet row of colours and moods */
+.filter-bar { padding: 0; margin: 0 0 16px; border: 0; background: none; border-radius: 0; }
+.filter-row { display: flex; align-items: center; gap: 10px; overflow-x: auto; scrollbar-width: none; margin: 10px -2px 0; padding: 4px 2px 6px; scroll-snap-type: x proximity; -webkit-mask-image: linear-gradient(90deg, #000 92%, transparent); mask-image: linear-gradient(90deg, #000 92%, transparent); }
+.filter-row::-webkit-scrollbar { display: none; }
+.filter-bar .color-filter, .filter-bar .mood-filter { display: flex; flex: none; gap: 6px; margin: 0; padding: 0; overflow: visible; }
+.color-chip { width: auto; padding: 2px; border-radius: 50%; }
+.color-chip i { width: 28px; height: 28px; }
+.color-chip[aria-pressed="true"] i::after { font-size: .78rem; }
+.filter-sep { flex: none; width: 1px; height: 22px; background: var(--line); }
+.filter-bar .mood-chip { padding: 6px 12px; font-size: .84rem; }
+.applied { margin-top: 10px; padding-top: 0; border-top: 0; }
+.applied[hidden] { display: none; }
+.flower-search { height: 42px; background: var(--bg); }
+
+/* cards: picture, name, colours; nothing else competing */
+.catalog { gap: 8px; }
+.flower { border-color: transparent; background: var(--bg); }
+.flower::after { opacity: 0; }
+.flower:hover, .flower:focus-within { border-color: color-mix(in srgb, var(--tint) 30%, var(--line)); }
+.flower:hover::after, .flower:focus-within::after, .flower.has::after { opacity: .7; }
+.flower.has { border-color: color-mix(in srgb, var(--tint) 40%, var(--line)); background: var(--paper); }
+.flower-add { padding: 14px 8px 4px; gap: 2px; }
+.flower small { min-height: 0; }
+.flower small .meaning { display: none; }
+.flower small .shade { font-weight: 500; font-size: .74rem; }
+.dots { padding: 4px 8px 12px; }
+
+/* the stepper is the progress indicator; no second bar under it */
+.stepper { margin-bottom: 20px; }
+
+/* gift: a few meanings at a glance */
+.meaning-title { flex-basis: 100%; grid-column: 1 / -1; margin: 0 0 2px 2px; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.meaning-list .m-item[hidden] { display: none; }
+.meaning-more { align-self: center; border: 0; background: none; padding: 8px 10px; font: inherit; font-size: .86rem; font-weight: 600; color: var(--rose-deep); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 600px) { .meaning-more { grid-column: 1 / -1; justify-self: start; } }
+/* toasts float above the sticky step buttons */
+#view-create:not([hidden]) ~ .toast, body:has(#view-create:not([hidden])) .toast { bottom: calc(100px + env(safe-area-inset-bottom)); }
+@media (max-width: 600px) {
+  .size-opt { flex-direction: column; align-items: center; gap: 0; padding: 7px 2px; }
+  .size-opt small { font-size: .7rem; }
+}
