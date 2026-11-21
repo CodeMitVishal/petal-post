@@ -162,7 +162,7 @@
     if (card) {
       const r = card.getBoundingClientRect();
       const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
-      const strength = card.matches('.wall-item') ? 3 : 9;
+      const strength = card.matches('.wall-item') ? 3 : card.matches('.flower') ? 5 : 9;
       card.style.rotate = `${-y} ${x} 0 ${Math.hypot(x, y) * strength}deg`;
       card.style.setProperty('--gx', (x + 0.5) * 100 + '%');
       card.style.setProperty('--gy', (y + 0.5) * 100 + '%');
@@ -230,6 +230,21 @@
         autoRemove(s);
       }
     };
+  });
+
+  // Picking a colour on a flower card sends a little ring of petals in that colour.
+  on('shade-picked', ({ from, color }) => {
+    if (!from) return;
+    const c = center(from);
+    for (let i = 0; i < 9; i++) {
+      const p = spawn('shade-petal', c.x, c.y);
+      p.style.background = color;
+      const a = (i / 9) * Math.PI * 2 + rand(-0.2, 0.2), d = rand(26, 40);
+      p.animate([
+        { transform: `translate(-50%,-50%) rotate(${(a * 180) / Math.PI + 90}deg) scale(.4)`, opacity: 0.95 },
+        { transform: `translate(calc(-50% + ${Math.cos(a) * d}px), calc(-50% + ${Math.sin(a) * d}px)) rotate(${(a * 180) / Math.PI + 90}deg) scale(1)`, opacity: 0 },
+      ], { duration: 560, easing: 'cubic-bezier(.2,.8,.2,1)' }).onfinish = () => p.remove();
+    }
   });
 
   // New wrap or ribbon colour washes over the preview.

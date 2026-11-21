@@ -32,17 +32,102 @@
     { id: 'op', type: 'orchid', name: 'Purple Orchid', meaning: 'Luxury & admiration', c: { base: '#C58BD9', dark: '#8E4FA8', light: '#EBCDF2' } },
     { id: 'ow', type: 'orchid', name: 'White Orchid', meaning: 'Elegance & reverence', c: { base: '#FFFDF8', dark: '#D9CDB9', light: '#F3E6F5', accent: '#E79AB8' } },
     { id: 'eu', type: 'eucalyptus', name: 'Eucalyptus', meaning: 'Protection & healing', c: { base: '#9DB8A4', dark: '#7E9C86', light: '#C9D9CC' } },
+    // ---- more colours of the classics (IDs are two letters: they travel inside gift links)
+    { id: 'rq', type: 'rose', name: 'Peach Rose', meaning: 'Sincerity & thanks', c: { base: '#FFB38A', dark: '#E2865C', light: '#FFD8C1' } },
+    { id: 'rl', type: 'rose', name: 'Lavender Rose', meaning: 'Love at first sight', c: { base: '#B9A1DE', dark: '#8A6CBE', light: '#E1D4F5' } },
+    { id: 'rb', type: 'rose', name: 'Blue Rose', meaning: 'The impossible, made real', c: { base: '#6F8EDB', dark: '#3F5AAD', light: '#AFC2F4' } },
+    { id: 'tr', type: 'tulip', name: 'Red Tulip', meaning: 'A declaration of love', c: { base: '#D9263A', dark: '#9E1527', light: '#F2697A' } },
+    { id: 'tk', type: 'tulip', name: 'Pink Tulip', meaning: 'Care & good wishes', c: { base: '#F59AB5', dark: '#D9698A', light: '#FFD0DE' } },
+    { id: 'tw', type: 'tulip', name: 'White Tulip', meaning: 'Forgiveness & fresh starts', c: { base: '#FBF7EE', dark: '#D7CCB6', light: '#FFFFFF' } },
+    { id: 'tg', type: 'tulip', name: 'Orange Tulip', meaning: 'Energy & enthusiasm', c: { base: '#FF8C2E', dark: '#DB6311', light: '#FFC07A' } },
+    { id: 'tl', type: 'tulip', name: 'Blue Tulip', meaning: 'Tranquillity & trust', c: { base: '#8E9BE0', dark: '#5F6CC0', light: '#C5CCF5' } },
+    { id: 'tb', type: 'tulip', name: 'Black Tulip', meaning: 'Power & quiet elegance', c: { base: '#4A1E3D', dark: '#2B0F23', light: '#86477A' } },
+    { id: 'ts', type: 'tulip', name: 'Flamed Tulip', meaning: 'Beautiful eyes', c: { base: '#FFF3DC', dark: '#D9C7A6', light: '#FFFFFF', flame: '#D2394A' } },
+    { id: 'tx', type: 'parrot', name: 'Parrot Tulip', meaning: 'Playful flair', c: { base: '#F49AC1', dark: '#C2577F', light: '#FFD3E6', accent: '#8DBB5C' } },
+    { id: 'td', type: 'doubletulip', name: 'Double Tulip', meaning: 'Abundance & a full heart', c: { base: '#F7B8C8', dark: '#D9829C', light: '#FFE3EB' } },
+    { id: 'lb', type: 'lily', name: 'Blue Lily', meaning: 'Trust & calm confidence', c: { base: '#86A9EC', dark: '#4F76C6', light: '#DCE8FF' } },
+    { id: 'lp', type: 'lily', name: 'Stargazer Lily', meaning: 'Ambition & big dreams', c: { base: '#F28AB0', dark: '#C2416F', light: '#FFF1F6', spots: '#A8164C' } },
+    { id: 'lo', type: 'lily', name: 'Tiger Lily', meaning: 'Confidence & pride', c: { base: '#FF7A1F', dark: '#D9530A', light: '#FFC48A', spots: '#5A2A14' } },
+    { id: 'lj', type: 'lily', name: 'Yellow Lily', meaning: 'Gratitude & happiness', c: { base: '#FBD54A', dark: '#D9A818', light: '#FFF2B3' } },
+    { id: 'pw', type: 'peony', name: 'White Peony', meaning: 'Bashful beauty & honour', c: { base: '#FFF8F2', dark: '#E2CFC4', light: '#FFFFFF' } },
+    { id: 'cw', type: 'carnation', name: 'White Carnation', meaning: 'Pure love & good luck', c: { base: '#FFFBF4', dark: '#DDD0BC', light: '#FFFFFF' } },
+    { id: 'rw', type: 'ranunculus', name: 'White Ranunculus', meaning: 'Charm & sweetness', c: { base: '#FFF9F0', dark: '#DCCDB6', light: '#FFFFFF' } },
+    { id: 'rf', type: 'ranunculus', name: 'Fuchsia Ranunculus', meaning: "You're dazzling", c: { base: '#E2457E', dark: '#B02660', light: '#F48CB1' } },
+    { id: 'hk', type: 'hydrangea', name: 'Pink Hydrangea', meaning: 'Heartfelt emotion', c: { base: '#F2A7C3', dark: '#D9789E', light: '#FBD3E2' } },
+    { id: 'hw', type: 'hydrangea', name: 'White Hydrangea', meaning: 'Abundance & purity', c: { base: '#F4F6EA', dark: '#C5CFB2', light: '#FFFFFF' } },
+    { id: 'ok', type: 'orchid', name: 'Pink Orchid', meaning: 'Grace & joy', c: { base: '#F48FBF', dark: '#C9568C', light: '#FFD1E6', accent: '#B0306A' } },
+    { id: 'gy', type: 'gerbera', name: 'Yellow Gerbera', meaning: 'Sunny cheer', c: { base: '#FFD23F', dark: '#E5AE12', light: '#FF8A3D' } },
+    { id: 'gr', type: 'gerbera', name: 'Red Gerbera', meaning: 'Bold, happy love', c: { base: '#E8303F', dark: '#B51A2A', light: '#FFD24A' } },
+    { id: 'pa', type: 'poppy', name: 'White Poppy', meaning: 'Peace & rest', c: { base: '#FBF7F0', dark: '#D9CFC0', light: '#FFFFFF' } },
+    { id: 'sr', type: 'sunflower', name: 'Red Sunflower', meaning: 'Warm, deep devotion', c: { base: '#B8432A', dark: '#8A2A16', light: '#3F2614' } },
+    { id: 'bp', type: 'babysbreath', name: "Pink Baby's Breath", meaning: 'Sweet, tender love', c: { base: '#F8D3DF', dark: '#E3A9BC', light: '#FFF0F5' } },
+    // ---- new kinds
+    { id: 'lt', type: 'lotus', name: 'Pink Lotus', meaning: 'Rising, beautifully, through anything', c: { base: '#F6B3CB', dark: '#E07AA0', light: '#FFE6EF', tip: '#D4567F' } },
+    { id: 'lu', type: 'lotus', name: 'White Lotus', meaning: 'Purity & peace of mind', c: { base: '#FFFBF5', dark: '#E6D8CC', light: '#FFFFFF', tip: '#F2C6D3' } },
+    { id: 'lx', type: 'lotus', name: 'Blue Lotus', meaning: 'Wisdom & serenity', c: { base: '#9DB6EE', dark: '#6B88D2', light: '#DCE6FB', tip: '#4C68B8' } },
+    { id: 'ka', type: 'calla', name: 'White Calla Lily', meaning: 'Magnificent beauty', c: { base: '#FBF8F0', dark: '#D8CDB8', light: '#FFFFFF' } },
+    { id: 'kb', type: 'calla', name: 'Burgundy Calla Lily', meaning: 'Passion & mystery', c: { base: '#7A1F3D', dark: '#4E1027', light: '#B0507A' } },
+    { id: 'ky', type: 'calla', name: 'Yellow Calla Lily', meaning: 'Gratitude & growth', c: { base: '#F6CF4A', dark: '#D5A41F', light: '#FFE695' } },
+    { id: 'dp', type: 'dahlia', name: 'Pink Dahlia', meaning: 'Grace & kindness', c: { base: '#F08DB4', dark: '#C95A86', light: '#FFC9DE' } },
+    { id: 'dw', type: 'dahlia', name: 'Café au Lait Dahlia', meaning: 'Elegance & commitment', c: { base: '#F3D9C8', dark: '#D6AE96', light: '#FFF1E8' } },
+    { id: 'dc', type: 'dahlia', name: 'Coral Dahlia', meaning: 'Bright new chapters', c: { base: '#FF8C6B', dark: '#E0603F', light: '#FFC1AD' } },
+    { id: 'an', type: 'anemone', name: 'White Anemone', meaning: 'Anticipation & hope', c: { base: '#FDFBF7', dark: '#D8D0C6', light: '#FFFFFF' } },
+    { id: 'av', type: 'anemone', name: 'Violet Anemone', meaning: 'Looking forward to you', c: { base: '#8D63C9', dark: '#5F3C98', light: '#C2A6E8' } },
+    { id: 'ib', type: 'iris', name: 'Blue Iris', meaning: 'Faith, hope & wisdom', c: { base: '#5E78D6', dark: '#3A4FA6', light: '#9DB0F0' } },
+    { id: 'iw', type: 'iris', name: 'White Iris', meaning: 'Purity & a kind heart', c: { base: '#FBF8F3', dark: '#D3CABD', light: '#FFFFFF' } },
+    { id: 'co', type: 'cosmos', name: 'Pink Cosmos', meaning: 'Harmony & peace', c: { base: '#F39CC0', dark: '#D26C96', light: '#FFD4E5' } },
+    { id: 'cc', type: 'cosmos', name: 'Chocolate Cosmos', meaning: 'Deep, lasting love', c: { base: '#5A2430', dark: '#3A121C', light: '#8A3B4C', center: '#2A0D14' } },
+    { id: 'mg', type: 'magnolia', name: 'Pink Magnolia', meaning: 'Dignity & sweet love', c: { base: '#F7CADA', dark: '#C2507B', light: '#FFF0F5' } },
+    { id: 'mw', type: 'magnolia', name: 'White Magnolia', meaning: 'Nobility & perseverance', c: { base: '#FFFDF7', dark: '#D6B4C2', light: '#FFFFFF' } },
+    { id: 'mo', type: 'marigold', name: 'Orange Marigold', meaning: 'Warmth & celebration', c: { base: '#F28C1B', dark: '#C9620A', light: '#FFB547' } },
+    { id: 'my', type: 'marigold', name: 'Yellow Marigold', meaning: 'Joy & good fortune', c: { base: '#F7C21B', dark: '#D49A08', light: '#FFE066' } },
+    { id: 'hr', type: 'hibiscus', name: 'Red Hibiscus', meaning: 'Delicate beauty', c: { base: '#E0313B', dark: '#9C1424', light: '#FF6D73' } },
+    { id: 'hp', type: 'hibiscus', name: 'Pink Hibiscus', meaning: 'Friendship & affection', c: { base: '#F592B6', dark: '#C2185B', light: '#FFC6DA' } },
+    { id: 'hy', type: 'hibiscus', name: 'Yellow Hibiscus', meaning: 'Happiness & sunshine', c: { base: '#F9D34A', dark: '#E0A81C', light: '#FFE98F', eye: '#C8312A' } },
+    { id: 'js', type: 'jasmine', name: 'Jasmine', meaning: 'Sweet love & grace', c: { base: '#FFFFFF', dark: '#DCD6CB', light: '#F6E08A', bud: '#F3C3D3' } },
+    { id: 'vl', type: 'valley', name: 'Lily of the Valley', meaning: 'Happiness returns', c: { base: '#FFFFFF', dark: '#CFD6C4', light: '#F4F7EE' } },
+    { id: 'fn', type: 'fern', name: 'Fern', meaning: 'Sincerity & shelter', c: { base: '#79A862', dark: '#557F44', light: '#A5CB8C' } },
   ];
-  // Mood groups for the catalog filter.
+
+  // Flower families: one card in the catalog, with a colour dot for each member.
+  const FAMILIES = [
+    ['rose', 'Rose'], ['tulip', 'Tulip'], ['lily', 'Lily'], ['lotus', 'Lotus'], ['peony', 'Peony'], ['calla', 'Calla Lily'],
+    ['dahlia', 'Dahlia'], ['hydrangea', 'Hydrangea'], ['orchid', 'Orchid'], ['ranunculus', 'Ranunculus'], ['carnation', 'Carnation'],
+    ['magnolia', 'Magnolia'], ['anemone', 'Anemone'], ['iris', 'Iris'], ['hibiscus', 'Hibiscus'], ['sunflower', 'Sunflower'],
+    ['gerbera', 'Gerbera'], ['daisy', 'Daisy'], ['cosmos', 'Cosmos'], ['poppy', 'Poppy'], ['marigold', 'Marigold'],
+    ['sakura', 'Cherry Blossom'], ['lavender', 'Lavender'], ['jasmine', 'Jasmine'], ['valley', 'Lily of the Valley'],
+    ['forgetmenot', 'Forget-me-not'], ['babysbreath', "Baby's Breath"], ['eucalyptus', 'Eucalyptus'], ['fern', 'Fern'],
+  ].map(([id, name]) => ({ id, name, ids: [] }));
+  const FAM_OF_TYPE = { parrot: 'tulip', doubletulip: 'tulip' };
+  const SHADE = { sf: 'Golden', bb: 'White' };
+  const FAMILY_ORDER = {
+    rose: ['rr', 'rp', 'rq', 'ry', 'ri', 'rl', 'rb'],
+    tulip: ['tr', 'tk', 'to', 'tg', 'ty', 'tw', 'tp', 'tl', 'tb', 'ts', 'tx', 'td'],
+    lily: ['ly', 'lp', 'lo', 'lj', 'lb'],
+    gerbera: ['gr', 'gp', 'go', 'gy'],
+    hydrangea: ['hb', 'hl', 'hk', 'hw'],
+  };
+
+  // Mood groups for the catalog filter (every flower is in exactly one).
   const MOODS = [
-    { id: 'romantic', name: 'Romantic', ids: ['rr', 'rp', 'pk', 'pc', 'cr', 'cp', 'rn'] },
-    { id: 'cheerful', name: 'Cheerful', ids: ['ry', 'ty', 'to', 'dz', 'sf', 'pr', 'po', 'go', 'gp'] },
-    { id: 'calm', name: 'Calm', ids: ['lv', 'sk', 'hb', 'hl', 'fm'] },
-    { id: 'elegant', name: 'Elegant', ids: ['ri', 'tp', 'ly', 'op', 'ow'] },
-    { id: 'green', name: 'Fillers', ids: ['bb', 'eu'] },
+    { id: 'romantic', name: 'Romantic', ids: ['rr', 'rp', 'pk', 'pc', 'cr', 'cp', 'rn', 'rq', 'tr', 'tk', 'td', 'lp', 'rf', 'hk', 'ok', 'lt', 'dp', 'cc', 'mg', 'hr', 'hp', 'gr', 'bp'] },
+    { id: 'cheerful', name: 'Cheerful', ids: ['ry', 'ty', 'to', 'dz', 'sf', 'pr', 'po', 'go', 'gp', 'tg', 'ts', 'tx', 'lo', 'lj', 'gy', 'sr', 'ky', 'dc', 'co', 'mo', 'my', 'hy'] },
+    { id: 'calm', name: 'Calm', ids: ['lv', 'sk', 'hb', 'hl', 'fm', 'rb', 'tl', 'lb', 'lx', 'ib', 'av', 'js', 'vl'] },
+    { id: 'elegant', name: 'Elegant', ids: ['ri', 'tp', 'ly', 'op', 'ow', 'rl', 'tw', 'tb', 'pw', 'cw', 'rw', 'hw', 'pa', 'lu', 'ka', 'kb', 'dw', 'an', 'iw', 'mw'] },
+    { id: 'green', name: 'Fillers', ids: ['bb', 'eu', 'fn'] },
   ];
   const BY_ID = Object.fromEntries(CATALOG.map(f => [f.id, f]));
   MOODS.forEach(m => m.ids.forEach(id => (BY_ID[id].mood = m.id)));
+  const FAM_BY_ID = Object.fromEntries(FAMILIES.map(f => [f.id, f]));
+  CATALOG.forEach(f => {
+    f.fam = FAM_OF_TYPE[f.type] || f.type;
+    const fam = FAM_BY_ID[f.fam];
+    fam.ids.push(f.id);
+    // the short colour label on the family card: "Blue Lily" → "Blue", "Parrot Tulip" → "Parrot"
+    f.shade = SHADE[f.id] || f.name.replace(new RegExp(`\\s*${fam.name}$`, 'i'), '').trim() || f.name;
+  });
+  // colour order on the cards: warm to cool, specials last
+  Object.entries(FAMILY_ORDER).forEach(([fam, order]) => FAM_BY_ID[fam].ids.sort((a, b) => order.indexOf(a) - order.indexOf(b)));
 
   // Bouquet sizes: Posy is short and compact, Grand is tall with a third row.
   const SIZES = {
@@ -91,7 +176,31 @@
         <path d="M-15,6 C-21,-12 -12,-22 -6,-29 C-2,-16 0,-4 -1,11 C-8,13 -13,10 -15,6Z" fill="${c.base}"/>
         <path d="M15,6 C21,-12 12,-22 6,-29 C2,-16 0,-4 1,11 C8,13 13,10 15,6Z" fill="${c.base}"/>
         <path d="M-9,9 C-12,-6 -6,-20 0,-25 C6,-20 12,-6 9,9 C4,13 -4,13 -9,9Z" fill="${c.base}" stroke="${c.dark}" stroke-width=".8"/>
-        <path d="M-4,4 C-6,-6 -3,-14 0,-18" fill="none" stroke="${c.light}" stroke-width="2.4" stroke-linecap="round" opacity=".8"/>`;
+        <path d="M-4,4 C-6,-6 -3,-14 0,-18" fill="none" stroke="${c.light}" stroke-width="2.4" stroke-linecap="round" opacity=".8"/>` +
+        (c.flame ? `<g fill="none" stroke="${c.flame}" stroke-linecap="round" opacity=".9">
+          <path d="M-13,4 C-17,-8 -12,-18 -7,-26 M-10,2 C-12,-6 -10,-12 -8,-16" stroke-width="1.6"/>
+          <path d="M13,4 C17,-8 12,-18 7,-26 M10,2 C12,-6 10,-12 8,-16" stroke-width="1.6"/>
+          <path d="M0,-24 C-3,-16 -2,-6 -5,6 M0,-24 C3,-16 2,-6 5,6 M0,-20 L0,8" stroke-width="1.3"/></g>` : '');
+    },
+    parrot(c) {
+      // ruffled, feathered petals with green flames
+      const L = 'M-1,11 C-8,13 -13,11 -15,7 C-22,-2 -21,-14 -15,-22 L-12,-18 L-12,-27 L-7,-21 L-5,-31 L-2,-24 C-2,-14 0,-4 -1,11Z';
+      const R = 'M1,11 C8,13 13,11 15,7 C22,-2 21,-14 15,-22 L12,-18 L12,-27 L7,-21 L5,-31 L2,-24 C2,-14 0,-4 1,11Z';
+      return `<path d="M-13,8 C-19,-8 -12,-24 0,-30 C12,-24 19,-8 13,8 C6,13 -6,13 -13,8Z" fill="${c.dark}"/>
+        <path d="${L}" fill="${c.base}" stroke="${c.dark}" stroke-width=".7"/><path d="${R}" fill="${c.base}" stroke="${c.dark}" stroke-width=".7"/>
+        <path d="M-9,10 C-12,-4 -9,-16 -6,-22 L-3,-17 L0,-29 L3,-17 L6,-22 C9,-16 12,-4 9,10 C4,13 -4,13 -9,10Z" fill="${c.light}" stroke="${c.dark}" stroke-width=".7"/>
+        <path d="M-11,6 C-13,-2 -11,-8 -9,-12 M11,6 C13,-2 11,-8 9,-12 M0,8 C-1,0 1,-8 0,-16" fill="none" stroke="${c.accent}" stroke-width="2.2" stroke-linecap="round" opacity=".85"/>
+        <path d="M-4,4 C-5,-4 -3,-10 -1,-14" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".6"/>`;
+    },
+    doubletulip(c) {
+      // the peony-flowered tulip: a cup of many rounded petals
+      const P = 'M0,8 C-10,6 -14,-10 -8,-20 C-4,-26 4,-26 8,-20 C14,-10 10,6 0,8Z';
+      let s = `<path d="M-16,6 C-22,-8 -16,-22 0,-27 C16,-22 22,-8 16,6 C8,13 -8,13 -16,6Z" fill="${c.dark}"/>`;
+      [[-9, -2, -24, 1], [9, -2, 24, 1], [-5, -6, -10, 0.86], [5, -6, 10, 0.86]].forEach(([x, y, a, k]) =>
+        (s += `<path d="${P}" fill="${c.base}" stroke="${c.dark}" stroke-width=".8" transform="translate(${x},${y}) rotate(${a}) scale(${k})"/>`));
+      s += `<path d="${P}" fill="${c.light}" stroke="${c.dark}" stroke-width=".8" transform="translate(0,-10) scale(.62)"/>`;
+      s += `<path d="${P}" fill="${c.base}" stroke="${c.dark}" stroke-width=".8" transform="translate(0,2) scale(.9)"/>`;
+      return s + `<path d="M-3,2 C-5,-6 -3,-12 0,-15" fill="none" stroke="${c.light}" stroke-width="2" stroke-linecap="round" opacity=".85"/>`;
     },
     daisy(c) {
       let s = '';
@@ -138,6 +247,12 @@
       const petal = 'M0,0 C-9,-10 -7,-28 0,-36 C7,-28 9,-10 0,0Z';
       for (let k = 0; k < 3; k++) s += `<path d="${petal}" fill="${c.dark}" ${rot(k * 120 + 60)}/>`;
       for (let k = 0; k < 3; k++) s += `<path d="${petal}" fill="${c.base}" stroke="${c.dark}" stroke-width="1" ${rot(k * 120)}/><path d="M0,-3 L0,-24" stroke="${c.light}" stroke-width="2.2" stroke-linecap="round" ${rot(k * 120)}/>`;
+      if (c.spots) {
+        for (let k = 0; k < 6; k++) {
+          [[-2.6, -9, 1], [2.4, -12, 0.9], [-2, -16, 0.8], [2.2, -19, 0.7], [-1.4, -22, 0.6]].forEach(([x, y, r]) =>
+            (s += `<circle cx="${x}" cy="${y}" r="${r}" fill="${c.spots}" ${rot(k * 60)}/>`));
+        }
+      }
       s += `<circle r="4" fill="${c.light}"/>`;
       for (let k = 0; k < 6; k++) s += `<line x1="0" y1="0" x2="0" y2="-15" stroke="#B7C483" stroke-width="1" ${rot(k * 60 + 30)}/><ellipse cx="0" cy="-16" rx="1.6" ry="3" fill="#C8692B" ${rot(k * 60 + 30)}/>`;
       return s;
@@ -228,14 +343,151 @@
       }
       return s;
     },
+    lotus(c) {
+      // a fan of pointed petals rising from the base, tips blushed deeper
+      const P = 'M0,0 C-9,-7 -11,-24 0,-36 C11,-24 9,-7 0,0Z';
+      const tip = 'M0,-25 C-4,-28 -4,-32 0,-36 C4,-32 4,-28 0,-25Z';
+      const petal = (a, sx, sy, fill) =>
+        `<g transform="rotate(${a}) scale(${sx},${sy})"><path d="${P}" fill="${fill}" stroke="${c.dark}" stroke-width=".8"/>` +
+        `<path d="${tip}" fill="${c.tip}" opacity=".55"/><path d="M0,-4 C-1,-14 -1,-22 0,-30" fill="none" stroke="${c.light}" stroke-width="1.4" stroke-linecap="round" opacity=".8"/></g>`;
+      let s = '';
+      [-80, 80, -60, 60].forEach(a => (s += petal(a, 0.84, 0.78, c.dark)));
+      [-40, 40, -22, 22].forEach(a => (s += petal(a, 0.95, 0.95, c.base)));
+      s += `<ellipse cy="-15" rx="8" ry="4" fill="#F2C94C"/><ellipse cy="-16" rx="5.5" ry="2.4" fill="#C9A227"/>`;
+      for (let k = -2; k <= 2; k++) s += `<line x1="${k * 3}" y1="-14" x2="${k * 3.6}" y2="-20" stroke="#E8B53A" stroke-width="1.1" stroke-linecap="round"/>`;
+      s += petal(-11, 0.9, 0.86, c.base) + petal(11, 0.9, 0.86, c.base) + petal(0, 1, 0.82, c.light);
+      return s + `<path d="M-10,3 C-6,7 6,7 10,3 C6,0 -6,0 -10,3Z" fill="#7FA36B"/>`;
+    },
+    calla(c) {
+      // a single swirled trumpet with a golden spadix
+      return `<path d="M-3,8 C-4,2 4,2 3,8Z" fill="#6E9A58"/>
+        <path d="M0,6 C-12,0 -15,-20 -7,-34 C-3,-40 8,-43 15,-38 C9,-34 6,-26 9,-16 C11,-6 6,2 0,6Z" fill="${c.base}" stroke="${c.dark}" stroke-width="1"/>
+        <path d="M-1,2 C-8,-6 -8,-22 -2,-32 C2,-37 7,-38 11,-37 C5,-31 3,-21 5,-12 C6,-4 3,1 -1,2Z" fill="${c.dark}" opacity=".32"/>
+        <path d="M1,1 C2,-7 3,-15 2,-23" fill="none" stroke="#F2C14E" stroke-width="3.4" stroke-linecap="round"/>
+        <path d="M-7,-34 C-1,-39 8,-42 15,-38" fill="none" stroke="${c.light}" stroke-width="1.6" stroke-linecap="round" opacity=".9"/>
+        <path d="M-10,-12 C-11,-20 -8,-27 -5,-31" fill="none" stroke="${c.light}" stroke-width="1.8" stroke-linecap="round" opacity=".6"/>`;
+    },
+    dahlia(c) {
+      // rings of pointed petals, packed tighter towards the centre
+      const P = 'M0,0 C-5,-6 -5,-20 0,-27 C5,-20 5,-6 0,0Z';
+      let s = '';
+      [[16, 1, c.dark], [14, 0.82, c.base], [12, 0.64, c.light], [10, 0.47, c.base], [8, 0.3, c.dark]].forEach(([n, k, fill], ring) => {
+        for (let i = 0; i < n; i++) s += `<path d="${P}" fill="${fill}" stroke="${c.dark}" stroke-width=".6" transform="rotate(${i * 360 / n + ring * 9}) scale(${k})"/>`;
+      });
+      return s + `<circle r="2.4" fill="${c.dark}"/>`;
+    },
+    anemone(c) {
+      const P = 'M0,-2 C-12,-6 -15,-24 0,-27 C15,-24 12,-6 0,-2Z';
+      let s = '';
+      for (let k = 0; k < 6; k++) {
+        s += `<path d="${P}" fill="${c.base}" stroke="${c.dark}" stroke-width=".8" ${rot(k * 60 + 30)}/>`;
+        s += `<path d="M0,-6 L0,-21 M0,-9 L-4,-19 M0,-9 L4,-19" fill="none" stroke="${c.dark}" stroke-width=".5" opacity=".6" ${rot(k * 60 + 30)}/>`;
+      }
+      for (let k = 0; k < 20; k++) s += `<circle cx="0" cy="-11" r="1.3" fill="#2B2733" ${rot(k * 18)}/>`;
+      return s + `<circle r="7.5" fill="#24212C"/><circle r="4.2" fill="#3F4A6B"/><circle cx="-1.4" cy="-1.6" r="1.4" fill="#fff" opacity=".35"/>`;
+    },
+    iris(c) {
+      // three standards up, three bearded falls between them
+      const std = 'M0,0 C-8,-6 -9,-22 0,-29 C9,-22 8,-6 0,0Z';
+      const fall = 'M0,0 C-13,-5 -16,-23 -6,-30 C-2,-33 2,-33 6,-30 C16,-23 13,-5 0,0Z';
+      let s = '';
+      [120, 240, 0].forEach(a => (s += `<path d="${std}" fill="${c.light}" stroke="${c.dark}" stroke-width=".8" ${rot(a)}/>`));
+      [60, 300, 180].forEach(a => {
+        s += `<path d="${fall}" fill="${c.base}" stroke="${c.dark}" stroke-width=".8" ${rot(a)}/>`;
+        s += `<path d="M0,-6 L-5,-22 M0,-6 L5,-22 M0,-6 L0,-25" fill="none" stroke="${c.dark}" stroke-width=".6" opacity=".55" ${rot(a)}/>`;
+        s += `<path d="M0,-5 L0,-16" stroke="#F2C14E" stroke-width="3" stroke-linecap="round" ${rot(a)}/>`;
+      });
+      return s + `<circle r="3.4" fill="${c.dark}"/>`;
+    },
+    cosmos(c) {
+      const P = 'M0,-5 C-8,-8 -10,-22 -6,-27 L-3,-24 L0,-28 L3,-24 L6,-27 C10,-22 8,-8 0,-5Z';
+      let s = '';
+      for (let k = 0; k < 8; k++) {
+        s += `<path d="${P}" fill="${c.base}" stroke="${c.dark}" stroke-width=".7" ${rot(k * 45 + 8)}/>`;
+        s += `<path d="M0,-8 L0,-22" stroke="${c.light}" stroke-width="1.2" stroke-linecap="round" opacity=".7" ${rot(k * 45 + 8)}/>`;
+      }
+      const ctr = c.center || '#F2C14E';
+      s += `<circle r="7" fill="${ctr}"/><circle r="7" fill="none" stroke="${c.center ? c.dark : '#D99A1F'}" stroke-width="1"/>`;
+      for (let k = 0; k < 10; k++) s += `<circle cx="0" cy="-4.4" r=".9" fill="${c.center ? c.light : '#B97C12'}" ${rot(k * 36)}/>`;
+      return s;
+    },
+    magnolia(c) {
+      // a cup of spoon-shaped petals, flushed at the base
+      const P = 'M0,0 C-11,-4 -13,-26 -4,-34 C-1,-36 1,-36 4,-34 C13,-26 11,-4 0,0Z';
+      const flush = 'M0,0 C-7,-3 -8,-11 0,-15 C8,-11 7,-3 0,0Z';
+      const petal = (a, k, fill) => `<g transform="rotate(${a}) scale(${k})"><path d="${P}" fill="${fill}" stroke="${c.dark}" stroke-width=".7"/><path d="${flush}" fill="${c.dark}" opacity=".45"/></g>`;
+      return petal(-46, 0.82, c.light) + petal(46, 0.82, c.light) + petal(-24, 0.96, c.base) + petal(24, 0.96, c.base) +
+        petal(-8, 1, c.base) + petal(10, 0.92, c.light) +
+        `<path d="M-6,4 C-3,-1 3,-1 6,4 C3,7 -3,7 -6,4Z" fill="#7A5A44"/><path d="M-2,4 L-3,7 M2,4 L3,7" stroke="#5E4434" stroke-width=".8"/>`;
+    },
+    marigold(c) {
+      // a ruffled pompom of tiny frilled petals
+      let s = `<circle r="23" fill="${c.dark}"/>`;
+      [[20, 18, 5.6, c.base], [15.5, 15, 5.2, c.light], [11, 12, 4.6, c.base], [6.5, 8, 4, c.light], [2.5, 4, 3.4, c.base]].forEach(([r, n, pr, fill], ring) => {
+        for (let k = 0; k < n; k++) s += `<circle cx="0" cy="${-r}" r="${pr}" fill="${fill}" stroke="${c.dark}" stroke-width=".7" ${rot(k * 360 / n + ring * 11)}/>`;
+      });
+      return s;
+    },
+    hibiscus(c) {
+      const P = 'M0,0 C-14,-4 -21,-22 -11,-30 C-6,-34 5,-35 11,-30 C21,-22 14,-4 0,0Z';
+      let s = '';
+      for (let k = 0; k < 5; k++) {
+        s += `<path d="${P}" fill="${c.base}" stroke="${c.dark}" stroke-width=".8" ${rot(k * 72)}/>`;
+        s += `<path d="M0,-3 L0,-26 M0,-6 L-7,-22 M0,-6 L7,-22" fill="none" stroke="${c.dark}" stroke-width=".5" opacity=".45" ${rot(k * 72)}/>`;
+        s += `<path d="M-6,-27 C-2,-30 3,-30 7,-27" fill="none" stroke="${c.light}" stroke-width="1.6" stroke-linecap="round" opacity=".8" ${rot(k * 72)}/>`;
+      }
+      const eye = c.eye || c.dark;
+      s += `<circle r="9" fill="${eye}" opacity=".9"/>`;
+      s += `<path d="M0,0 L11,-27" stroke="${eye}" stroke-width="2.4" stroke-linecap="round"/>`;
+      [[7, -18], [8.5, -21], [6, -22], [9.5, -24], [8, -25.5]].forEach(([x, y]) => (s += `<circle cx="${x}" cy="${y}" r="1.4" fill="#F6D04D"/>`));
+      [[10, -29], [12.5, -28.5], [11, -31]].forEach(([x, y]) => (s += `<circle cx="${x}" cy="${y}" r="1.3" fill="${c.dark}"/>`));
+      return s;
+    },
+    jasmine(c) {
+      // a cluster of white five-point stars with a couple of pink buds
+      const spots = [[0, -4, 1], [-12, -10, 0.85], [11, -12, 0.9], [-3, -21, 0.8], [10, 2, 0.72], [-11, 4, 0.7]];
+      const star = 'M0,-1.5 C-3,-4 -3.4,-9 0,-11.5 C3.4,-9 3,-4 0,-1.5Z';
+      let s = '';
+      spots.concat([[4, -29, 0], [-17, -20, 0]]).forEach(([x, y]) => (s += `<path d="M0,12 Q${x * 0.4},${(y + 12) / 2} ${x},${y}" stroke="#6E8F5A" stroke-width=".9" fill="none"/>`));
+      [[4, -29, -20], [-17, -20, 30]].forEach(([x, y, a]) => (s += `<ellipse cx="${x}" cy="${y}" rx="2.4" ry="5" fill="${c.bud}" transform="rotate(${a} ${x} ${y})"/>`));
+      spots.forEach(([x, y, k], i) => {
+        s += `<g transform="translate(${x},${y}) scale(${k}) rotate(${i * 17})">`;
+        for (let p = 0; p < 5; p++) s += `<path d="${star}" fill="${c.base}" stroke="${c.dark}" stroke-width=".6" ${rot(p * 72)}/>`;
+        s += `<circle r="1.8" fill="${c.light}"/></g>`;
+      });
+      return s;
+    },
+    valley(c) {
+      // an arching stem of little hanging bells in front of a broad leaf
+      let s = `<path d="M-4,8 C-19,-8 -15,-36 -7,-48 C-3,-31 2,-11 -4,8Z" fill="#7FA36B"/><path d="M-4,6 C-7,-12 -7,-30 -7,-44" stroke="#5E8A4F" stroke-width=".8" fill="none"/>`;
+      s += `<path d="M0,6 C1,-12 9,-30 22,-38" stroke="#6E9A58" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+      const bell = 'M-4,0 C-4.5,-6 4.5,-6 4,0 C4,3 3.5,4.5 4.6,6 L2,5.2 L0,7 L-2,5.2 L-4.6,6 C-3.5,4.5 -4,3 -4,0Z';
+      [[1.6, -8, 1.05], [4.4, -17, 1], [9, -25, 0.92], [14.6, -31.5, 0.82], [20, -36, 0.7]].forEach(([x, y, k]) => {
+        s += `<path d="M${x},${y} Q${x + 2},${y + 2} ${x + 2.5},${y + 5}" stroke="#6E9A58" stroke-width=".9" fill="none"/>`;
+        s += `<path d="${bell}" fill="${c.base}" stroke="${c.dark}" stroke-width=".7" transform="translate(${x + 2.5},${y + 8}) scale(${k})"/>`;
+      });
+      return s;
+    },
+    fern(c) {
+      let s = `<path d="M0,6 C1,-20 -1,-44 3,-64 C5,-70 1,-73 -2,-70" stroke="${c.dark}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+      for (let i = 0; i < 11; i++) {
+        const y = -2 - i * 5.8, L = 15 * (1 - i * 0.075);
+        s += `<ellipse cx="${-L / 2}" cy="${y}" rx="${L / 2}" ry="2.3" fill="${i % 2 ? c.base : c.dark}" transform="rotate(-24 0 ${y})"/>`;
+        s += `<ellipse cx="${L / 2}" cy="${y - 2.5}" rx="${L / 2}" ry="2.3" fill="${i % 2 ? c.dark : c.base}" transform="rotate(24 0 ${y - 2.5})"/>`;
+      }
+      return s + `<path d="M-1,-40 C-4,-46 -2,-52 1,-56" stroke="${c.light}" stroke-width=".8" fill="none" opacity=".7"/>`;
+    },
   };
 
-  const TYPE_SCALE = { sunflower: 1.12, lily: 1.08, babysbreath: 1.05, peony: 1.12, hydrangea: 1.06, gerbera: 1.04 };
+  const TYPE_SCALE = { sunflower: 1.12, lily: 1.08, babysbreath: 1.05, peony: 1.12, hydrangea: 1.06, gerbera: 1.04, lotus: 1.1, dahlia: 1.1, magnolia: 1.04, hibiscus: 1.06, doubletulip: 1.06, parrot: 1.04 };
   const THUMB_VB = {
     lavender: '-30 -66 60 76', eucalyptus: '-30 -66 60 76', tulip: '-28 -36 56 52', sakura: '-30 -32 60 50',
     babysbreath: '-26 -30 52 48', forgetmenot: '-24 -36 48 52', orchid: '-30 -34 60 60',
+    parrot: '-28 -38 56 54', doubletulip: '-28 -34 56 50', lotus: '-36 -38 72 46', calla: '-24 -46 48 56',
+    magnolia: '-30 -38 60 46', jasmine: '-26 -36 52 52', valley: '-24 -52 52 62', fern: '-30 -76 60 84',
   };
-  const UPRIGHT = { tulip: 1, lavender: 1, eucalyptus: 1 }; // heads that follow the stem direction
+  // heads that follow the stem direction instead of turning to face the viewer
+  const UPRIGHT = { tulip: 1, lavender: 1, eucalyptus: 1, parrot: 1, doubletulip: 1, lotus: 1, calla: 1, magnolia: 1, valley: 1, fern: 1 };
 
   function headThumb(id) {
     const f = BY_ID[id];
@@ -387,7 +639,7 @@
   }
 
   window.Flora = {
-    CATALOG, BY_ID, MOODS, SIZES, MAX_STEMS, WRAPS, RIBBONS, HEADS, VIEWBOX,
+    CATALOG, BY_ID, FAMILIES, FAM_BY_ID, MOODS, SIZES, MAX_STEMS, WRAPS, RIBBONS, HEADS, VIEWBOX,
     headThumb, layout, drawOrder, stemMarkup, applyPos, bouquetSVG, skeleton, setSize, recolor,
   };
 })();

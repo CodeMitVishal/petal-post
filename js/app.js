@@ -12,21 +12,21 @@
 
   /* ================= data ================= */
   const OCCASIONS = [
-    { id: 'love', label: 'Love', emoji: '💗', sub: 'Anniversaries & just us', preset: ['rr', 'pk', 'bb', 'rr', 'rp', 'cr', 'rr', 'bb'], w: 'blush', r: 'ruby',
+    { id: 'love', label: 'Love', emoji: '💗', sub: 'Anniversaries & just us', preset: ['rr', 'pk', 'bb', 'rr', 'rp', 'tr', 'rr', 'bb'], w: 'blush', r: 'ruby',
       notes: ['Every day with you feels like spring. These are for you. No reason needed, just love.', "If I had a flower for every time I thought of you, I'd walk through my garden forever.", 'You make my whole world bloom. Happy us. ♡'] },
-    { id: 'birthday', label: 'Birthday', emoji: '🎂', sub: 'Another lap round the sun', preset: ['sf', 'gp', 'ty', 'go', 'dz', 'sf', 'to'], w: 'kraft', r: 'gold',
+    { id: 'birthday', label: 'Birthday', emoji: '🎂', sub: 'Another lap round the sun', preset: ['sf', 'gp', 'ty', 'go', 'dz', 'sf', 'tx'], w: 'kraft', r: 'gold',
       notes: ['Happy birthday! May your year be as bright as these sunflowers.', 'Another trip around the sun, and you just keep getting more wonderful. Have the best day!', 'Wishing you cake, laughter and a whole bouquet of good things this year.'] },
-    { id: 'thanks', label: 'Thank you', emoji: '🙏', sub: 'For the big & little things', preset: ['rp', 'hb', 'cp', 'bb', 'tp', 'rn'], w: 'cream', r: 'lilac',
+    { id: 'thanks', label: 'Thank you', emoji: '🙏', sub: 'For the big & little things', preset: ['rp', 'hb', 'dp', 'bb', 'tk', 'rn'], w: 'cream', r: 'lilac',
       notes: ['Thank you for everything. These blooms are a small way of saying you mean a lot.', "Your kindness didn't go unnoticed. Thank you, truly.", 'For all the little things you do: thank you.'] },
-    { id: 'sorry', label: "I'm sorry", emoji: '🫶', sub: 'Words are hard, flowers help', preset: ['ri', 'lv', 'hl', 'ri', 'bb', 'fm'], w: 'sage', r: 'ivory',
+    { id: 'sorry', label: "I'm sorry", emoji: '🫶', sub: 'Words are hard, flowers help', preset: ['ri', 'lv', 'tw', 'ri', 'bb', 'fm'], w: 'sage', r: 'ivory',
       notes: ["I'm sorry. You matter more to me than being right. Can we start fresh?", "These can't fix it, but I hope they show how much I care. I'm truly sorry.", "I got it wrong, and I'm sorry. Thank you for your patience with me."] },
     { id: 'getwell', label: 'Get well', emoji: '🌤️', sub: 'Sunshine for recovery', preset: ['sf', 'dz', 'go', 'ly', 'ty', 'dz'], w: 'sage', r: 'gold',
       notes: ['Sending a little sunshine your way. Rest up and feel better soon!', 'Get well soon. The world is less bright without you at full power.', 'Thinking of you and wishing you a speedy recovery.'] },
-    { id: 'congrats', label: 'Congrats', emoji: '🎉', sub: 'New job, new home, big win', preset: ['sf', 'ty', 'po', 'go', 'ry', 'sf', 'dz'], w: 'midnight', r: 'gold',
+    { id: 'congrats', label: 'Congrats', emoji: '🎉', sub: 'New job, new home, big win', preset: ['sf', 'ty', 'mo', 'go', 'ry', 'sf', 'dz'], w: 'midnight', r: 'gold',
       notes: ['You did it! So proud of you. Congratulations!', 'Big news deserves big flowers. Congratulations!', "Here's to you and everything you've worked for. Congrats!"] },
-    { id: 'sympathy', label: 'Thinking of you', emoji: '🕊️', sub: 'Comfort from afar', preset: ['ly', 'ow', 'ri', 'hb', 'bb', 'eu'], w: 'cream', r: 'ivory',
+    { id: 'sympathy', label: 'Thinking of you', emoji: '🕊️', sub: 'Comfort from afar', preset: ['ly', 'lu', 'ri', 'hb', 'bb', 'eu'], w: 'cream', r: 'ivory',
       notes: ['Thinking of you, and holding you close in my heart.', "There are no right words, so I'm sending flowers and all my love.", "I'm here for you, today and every day after."] },
-    { id: 'just', label: 'Just because', emoji: '✨', sub: 'No reason at all', preset: ['sk', 'rn', 'dz', 'sk', 'pk', 'fm'], w: 'blush', r: 'lilac',
+    { id: 'just', label: 'Just because', emoji: '✨', sub: 'No reason at all', preset: ['sk', 'rn', 'co', 'sk', 'pk', 'fm'], w: 'blush', r: 'lilac',
       notes: ['No reason. I just thought of you and wanted to make you smile.', "A little bouquet for a lovely person. That's the whole message.", 'Saw these and thought of you. Have a beautiful day.'] },
   ];
   const OCC = Object.fromEntries(OCCASIONS.map(o => [o.id, o]));
@@ -485,7 +485,9 @@
     });
 
     const track = $('#marquee');
-    const items = F.CATALOG.map(f => `<div class="m-item">${F.headThumb(f.id)}<div><strong>${f.name}</strong><small>${f.meaning}</small></div></div>`).join('');
+    // one of each kind, plus a few showpiece colours
+    const showcase = [...new Set([...F.FAMILIES.map(f => f.ids[0]), 'lb', 'tb', 'tx', 'lx', 'ts', 'rb'])].map(id => F.BY_ID[id]);
+    const items = showcase.map(f => `<div class="m-item">${F.headThumb(f.id)}<div><strong>${f.name}</strong><small>${f.meaning}</small></div></div>`).join('');
     track.innerHTML = items + items;
 
     $('#heroReplay').addEventListener('click', e => { growHero(); burstFrom(e.currentTarget, 20); });
@@ -508,7 +510,7 @@
   /* ================= BUILDER ================= */
   let uidN = 0;
   const newItem = (id, k = Math.random()) => ({ uid: `u${++uidN}`, id, k });
-  const blankState = () => ({ o: '', items: [], aside: [], z: 'm', w: 'kraft', r: 'ruby', t: '', f: '', m: '', mAuto: false, d: '', s: randSeed(), step: 0, touched: false, noteIdx: 0, wall: false, p: '', ps: '', pr: '', mood: 'all' });
+  const blankState = () => ({ o: '', items: [], aside: [], z: 'm', w: 'kraft', r: 'ruby', t: '', f: '', m: '', mAuto: false, d: '', s: randSeed(), step: 0, touched: false, noteIdx: 0, wall: false, p: '', ps: '', pr: '', mood: 'all', sel: {} });
   const previews = {}; // local blob previews for photos picked in this session
   let chosenOpen = false; // "Show all kinds" toggle for the picked-flowers list
 
@@ -559,6 +561,7 @@
     s.aside = (Array.isArray(d.aside) ? d.aside : []).filter(id => F.BY_ID[id]).slice(0, MAX_ALL);
     s.mAuto = !!d.mAuto; s.touched = !!d.touched; s.wall = !!d.wall;
     s.mood = d.mood === 'all' || F.MOODS.some(m => m.id === d.mood) ? d.mood : 'all';
+    if (d.sel && typeof d.sel === 'object') Object.entries(d.sel).forEach(([fam, id]) => { if (F.FAM_BY_ID[fam] && F.BY_ID[id] && F.BY_ID[id].fam === fam) s.sel[fam] = id; });
     s.ps = Photos.valid(d.ps) ? d.ps : ''; s.pr = Photos.valid(d.pr) ? d.pr : ''; s.step = Math.min(4, Math.max(0, d.step | 0));
     return s;
   }
@@ -623,7 +626,7 @@
       sp.querySelector(`[data-size="${next}"]`).focus();
     });
 
-    // mood filter for the 28 flowers
+    // mood filter for the whole catalog
     const mf = $('#moodFilter');
     [{ id: 'all', name: 'All', ids: F.CATALOG.map(f => f.id) }, ...F.MOODS].forEach(m => {
       const b = document.createElement('button');
@@ -651,46 +654,67 @@
       oc.appendChild(b);
     });
 
-    // catalog
+    // catalog: one card per flower family, with a colour dot for each member
     const cat = $('#catalog');
-    F.CATALOG.forEach(f => {
+    F.FAMILIES.forEach(fam => {
       const card = document.createElement('div');
-      card.className = 'flower';
-      card.dataset.id = f.id;
-      card.setAttribute('role', 'button');
-      card.tabIndex = 0;
-      card.setAttribute('aria-label', `Add ${f.name}: ${f.meaning}`);
-      card.title = f.meaning;
-      card.innerHTML = `${F.headThumb(f.id)}<strong>${f.name}</strong><small>${f.meaning}</small><span class="count" aria-hidden="true">0</span><button type="button" class="minus" aria-label="Remove one ${f.name}">−</button>`;
-      const add = () => {
-        if (state.items.length >= maxStems()) {
-          const bigger = state.z === 's' ? 'Classic' : state.z === 'm' ? 'Grand' : '';
-          toast(bigger ? `A ${sizeOf(state.z).name} holds ${maxStems()} stems. Switch to ${bigger} for more room.` : `A Grand bouquet holds up to ${maxStems()} stems.`);
-          const sp = $('#sizePick');
-          if (bigger && sp) { sp.classList.remove('nudge'); void sp.offsetWidth; sp.classList.add('nudge'); }
-          return;
-        }
-        state.items.push(newItem(f.id));
-        state.touched = true;
-        card.classList.remove('pulse'); void card.offsetWidth; card.classList.add('pulse');
-        emit('flower-added', { from: card });
-        renderAll();
-      };
-      card.addEventListener('click', e => { if (!e.target.closest('.minus')) add(); });
-      card.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === card) { e.preventDefault(); add(); } });
-      card.querySelector('.minus').addEventListener('click', () => removeOne(f.id));
+      card.className = 'flower' + (fam.ids.length > 8 ? ' wide' : '');
+      card.dataset.fam = fam.id;
+      const many = fam.ids.length > 1;
+      card.innerHTML =
+        `<button type="button" class="flower-add"><span class="thumb"></span><strong></strong><small><em class="shade"></em><span class="meaning"></span></small></button>` +
+        (many ? `<div class="dots" role="radiogroup" aria-label="${fam.name} colours"></div>` : '') +
+        `<span class="count" aria-hidden="true">0</span><button type="button" class="minus" aria-label="Remove one ${fam.name}">−</button>`;
+      card.querySelector('strong').textContent = fam.name;
+      if (many) {
+        const dots = card.querySelector('.dots');
+        fam.ids.forEach(id => {
+          const f = F.BY_ID[id];
+          const d = document.createElement('button');
+          d.type = 'button';
+          d.className = 'dot';
+          d.dataset.id = id;
+          d.setAttribute('role', 'radio');
+          d.setAttribute('aria-label', f.shade);
+          d.title = `${f.name}: ${f.meaning}`;
+          d.style.background = dotPaint(f);
+          d.addEventListener('click', () => {
+            if (selOf(fam.id) === id) addFlower(id, card); // tapping the chosen colour again adds it
+            else pickShade(fam.id, id, true);
+          });
+          dots.appendChild(d);
+        });
+        dots.addEventListener('keydown', e => {
+          const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+          if (!step) return;
+          e.preventDefault();
+          const live = [...dots.querySelectorAll('.dot:not([hidden])')];
+          const i = live.findIndex(d => d.dataset.id === selOf(fam.id));
+          const next = live[(i + step + live.length) % live.length];
+          pickShade(fam.id, next.dataset.id, true);
+          next.focus();
+        });
+      }
+      card.querySelector('.flower-add').addEventListener('click', () => addFlower(selOf(fam.id), card));
+      card.querySelector('.minus').addEventListener('click', () => removeFromFamily(fam.id));
       cat.appendChild(card);
+      paintCard(card, false);
     });
+    $('#flowerSearch').addEventListener('input', e => { query = e.target.value; renderMood(true); });
 
     $('#surpriseBtn').addEventListener('click', e => {
-      const ids = F.CATALOG.map(f => f.id);
+      // a harmonious surprise: flowers from one mood, finished with a filler
+      const moods = F.MOODS.filter(m => m.id !== 'green');
+      const mood = moods[(Math.random() * moods.length) | 0];
       const [lo, hi] = { s: [4, 7], m: [6, 11], l: [12, 22] }[state.z] || [6, 11];
       const n = lo + ((Math.random() * (hi - lo + 1)) | 0);
-      const pick = [...ids].sort(() => Math.random() - 0.5).slice(0, (state.z === 'l' ? 5 : 3) + ((Math.random() * 2) | 0));
+      const pick = [...mood.ids].sort(() => Math.random() - 0.5).slice(0, (state.z === 'l' ? 5 : 3) + ((Math.random() * 2) | 0));
+      const filler = ['bb', 'eu', 'fn', 'bp', 'js'][(Math.random() * 5) | 0];
       state.aside = [];
-      state.items = Array.from({ length: n }, () => newItem(pick[(Math.random() * pick.length) | 0]));
+      state.items = Array.from({ length: n - 1 }, () => newItem(pick[(Math.random() * pick.length) | 0])).concat(newItem(filler));
       state.s = randSeed(); state.touched = true;
       burstFrom(e.currentTarget, 16);
+      toast(`A ${mood.name.toLowerCase()} surprise ✦`);
       renderAll();
     });
     $('#presetBtn').addEventListener('click', () => { state.touched = false; applyOccasion(state.o, false); renderAll(); });
@@ -787,6 +811,82 @@
     renderAll();
   }
 
+  /* ---------- flower families & colours ---------- */
+  let query = ''; // catalog search text
+  const lum = hex => { const n = parseInt(hex.slice(1), 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; };
+  const selOf = fam => (F.BY_ID[state.sel[fam]] && F.BY_ID[state.sel[fam]].fam === fam ? state.sel[fam] : F.FAM_BY_ID[fam].ids[0]);
+
+  // A dot shows the colour as a little lit sphere; striped and two-tone flowers show both colours.
+  function dotPaint(f) {
+    const c = f.c;
+    if (c.flame) return `repeating-linear-gradient(110deg, ${c.base} 0 3px, ${c.flame} 3px 5px)`;
+    if (c.accent && f.type === 'parrot') return `conic-gradient(from 30deg, ${c.base} 0 60%, ${c.accent} 60% 75%, ${c.base} 75%)`;
+    return `radial-gradient(circle at 35% 30%, ${c.light} 0 18%, ${c.base} 46%, ${c.dark} 100%)`;
+  }
+
+  // Updates a family card to its chosen colour (thumb, label, tint and the selected dot).
+  function paintCard(card, animate) {
+    const fam = card.dataset.fam, id = selOf(fam), f = F.BY_ID[id];
+    const thumb = card.querySelector('.thumb');
+    if (thumb.dataset.id !== id) {
+      thumb.dataset.id = id;
+      thumb.innerHTML = F.headThumb(id);
+      if (animate && !reduced()) { thumb.classList.remove('swap'); void thumb.offsetWidth; thumb.classList.add('swap'); }
+    }
+    card.dataset.id = id;
+    card.style.setProperty('--tint', lum(f.c.base) > 0.9 ? f.c.dark : f.c.base); // pale flowers tint with their shadow colour
+    const many = F.FAM_BY_ID[fam].ids.length > 1;
+    card.querySelector('.shade').textContent = many ? f.shade : '';
+    card.querySelector('.meaning').textContent = f.meaning;
+    card.querySelector('.flower-add').setAttribute('aria-label', `Add a ${f.name}: ${f.meaning}`);
+    card.querySelector('.flower-add').title = `${f.name}: ${f.meaning}`;
+    card.querySelectorAll('.dot').forEach(d => {
+      const on = d.dataset.id === id;
+      d.setAttribute('aria-checked', on);
+      d.tabIndex = on ? 0 : -1;
+    });
+  }
+
+  function pickShade(fam, id, animate) {
+    if (selOf(fam) === id) return;
+    state.sel = { ...state.sel, [fam]: id };
+    const card = $(`#catalog .flower[data-fam="${fam}"]`);
+    if (card) paintCard(card, animate);
+    if (animate) emit('shade-picked', { from: card && card.querySelector('.thumb'), color: F.BY_ID[id].c.base });
+    save();
+  }
+
+  function addFlower(id, card) {
+    if (state.items.length >= maxStems()) {
+      const bigger = state.z === 's' ? 'Classic' : state.z === 'm' ? 'Grand' : '';
+      toast(bigger ? `A ${sizeOf(state.z).name} holds ${maxStems()} stems. Switch to ${bigger} for more room.` : `A Grand bouquet holds up to ${maxStems()} stems.`);
+      const sp = $('#sizePick');
+      if (bigger && sp) { sp.classList.remove('nudge'); void sp.offsetWidth; sp.classList.add('nudge'); }
+      return;
+    }
+    state.items.push(newItem(id));
+    state.touched = true;
+    if (card) { card.classList.remove('pulse'); void card.offsetWidth; card.classList.add('pulse'); }
+    emit('flower-added', { from: card });
+    renderAll();
+  }
+
+  // "−" on a card takes back the latest stem of the colour on show, or else of that family.
+  function removeFromFamily(fam) {
+    const id = selOf(fam);
+    if (state.items.some(i => i.id === id)) return removeOne(id);
+    const list = ordered().filter(i => F.BY_ID[i.id].fam === fam);
+    if (list.length) removeOne(list[list.length - 1].id);
+  }
+
+  // Search matches a family name, a colour, a flower's name or its meaning.
+  function flowerMatches(f) {
+    const q = query.trim().toLowerCase();
+    if (!q) return true;
+    const fam = F.FAM_BY_ID[f.fam].name;
+    return q.split(/\s+/).every(w => `${f.name} ${fam} ${f.meaning} ${f.mood}`.toLowerCase().includes(w));
+  }
+
   function shareText(withUrl = true) {
     const name = state.t.trim();
     return `${name ? name + ', ' : ''}I sent you flowers 💐 Open them here:${withUrl ? ' ' + giftUrl() : ''}`;
@@ -854,12 +954,18 @@
   }
 
   function renderCatalog() {
-    const counts = {};
-    state.items.forEach(i => (counts[i.id] = (counts[i.id] || 0) + 1));
+    const counts = {}, famCounts = {};
+    state.items.forEach(i => {
+      counts[i.id] = (counts[i.id] || 0) + 1;
+      const fam = F.BY_ID[i.id].fam;
+      famCounts[fam] = (famCounts[fam] || 0) + 1;
+    });
     $$('#catalog .flower').forEach(c => {
-      const n = counts[c.dataset.id] || 0;
+      const n = famCounts[c.dataset.fam] || 0;
       c.classList.toggle('has', n > 0);
       c.querySelector('.count').textContent = n;
+      paintCard(c, false);
+      c.querySelectorAll('.dot').forEach(d => d.classList.toggle('in', !!counts[d.dataset.id])); // colours already in the bouquet
     });
     const chosen = $('#chosen');
     chosen.innerHTML = '';
@@ -1058,22 +1164,33 @@
       b.setAttribute('aria-checked', on);
       b.tabIndex = on ? 0 : -1;
     });
-    $('#flowersHint').textContent = `Tap to add, up to ${maxStems()} stems for a ${sizeOf(state.z).name}. Hover or focus a flower to see its meaning.`;
+    $('#flowersHint').textContent = `Pick a colour, then tap a flower to add it. Up to ${maxStems()} stems for a ${sizeOf(state.z).name}.`;
   }
 
   function renderMood(animate) {
     const mood = state.mood || 'all';
     $$('#moodFilter .mood-chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.mood === mood));
-    let i = 0;
+    let i = 0, shown = 0;
     $$('#catalog .flower').forEach(card => {
-      const show = mood === 'all' || F.BY_ID[card.dataset.id].mood === mood;
+      const fam = card.dataset.fam;
+      const fits = F.FAM_BY_ID[fam].ids.filter(id => (mood === 'all' || F.BY_ID[id].mood === mood) && flowerMatches(F.BY_ID[id]));
+      const show = fits.length > 0;
+      // colours outside the mood or search step back; the card shows the first colour that fits
+      card.querySelectorAll('.dot').forEach(d => d.classList.toggle('dim', !fits.includes(d.dataset.id)));
+      if (show && !fits.includes(selOf(fam))) pickShade(fam, fits[0], false);
       const was = !card.hidden;
       card.hidden = !show;
+      if (show) shown++;
       if (show && animate && !reduced()) {
-        card.style.setProperty('--fi', i++);
+        card.style.setProperty('--fi', Math.min(i++, 14));
         card.classList.remove('flower-in'); void card.offsetWidth; card.classList.add('flower-in');
       } else if (!was && show) card.classList.remove('flower-in');
     });
+    const none = $('#catalogEmpty');
+    if (none) {
+      none.hidden = shown > 0;
+      if (!shown) none.textContent = query.trim() ? `No flowers match “${query.trim()}”. Try a colour like “blue” or a feeling like “love”.` : 'No flowers here.';
+    }
   }
 
   function renderAll() {
